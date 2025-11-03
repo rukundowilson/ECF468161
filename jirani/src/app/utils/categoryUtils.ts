@@ -146,7 +146,10 @@ export function usesLetterSizes(categoryName: string | undefined, category?: { s
 export function getSizeType(categoryName: string | undefined, category?: { size_type?: string }): 'numeric' | 'letter' | 'none' {
   // Primary: Use database settings if available
   if (category && category.size_type) {
-    return category.size_type;
+    const sizeType = category.size_type.toLowerCase();
+    if (sizeType === 'numeric' || sizeType === 'letter') {
+      return sizeType as 'numeric' | 'letter';
+    }
   }
   
   // Fallback: Use name-based detection for backward compatibility

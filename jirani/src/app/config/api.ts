@@ -1,7 +1,22 @@
 import axios from 'axios';
 
-// Base URL configuration - update this to match your backend server
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// Base URL configuration - automatically uses production URL in production
+const getBaseURL = () => {
+  // Use environment variable if set
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Use production URL in production environment
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://ecb468161.onrender.com';
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:8080';
+};
+
+const BASE_URL = getBaseURL();
 
 // Create axios instance with default config
 const API = axios.create({

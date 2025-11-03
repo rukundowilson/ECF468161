@@ -216,7 +216,7 @@ export default function EcommerceHomepage() {
                 Shop in Kigali & Across Rwanda
               </h2>
               <p className="text-lg md:text-xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
-                Discover amazing products from local vendors across <span className="font-bold text-yellow-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
+                Discover amazing products from local vendors across <span className="font-bold text-orange-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link 

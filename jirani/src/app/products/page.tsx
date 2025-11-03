@@ -752,7 +752,7 @@ export default function ProductsPage() {
                           <h3 className="font-medium text-black">{product.name || 'Unnamed Product'}</h3>
                           <p className="text-sm text-black mt-1">{product.description || 'No description'}</p>
                           <p className="text-xs text-gray-600 mt-1">
-                            SKU: {product.sku || 'N/A'} | Price: ${product.price || 0}
+                            SKU: {product.sku || 'N/A'} | Price: {Number(product.price || 0).toFixed(2)} frw
                           </p>
                           <p className="text-xs text-gray-600">
                             Category: {product.category_name || 'N/A'} | Brand: {product.brand || 'N/A'}
@@ -827,7 +827,7 @@ export default function ProductsPage() {
                           <div>
                           <h3 className="font-medium text-black">SKU: {variant.sku}</h3>
                           <p className="text-sm text-black">
-                            Additional Price: ${variant.additional_price}
+                            Additional Price: {Number(variant.additional_price || 0).toFixed(2)} frw
                           </p>
                           <div className="text-sm text-black">
                             <span className="font-medium">Attributes:</span>

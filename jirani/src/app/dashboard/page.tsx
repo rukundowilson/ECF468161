@@ -105,7 +105,7 @@ export default function DashboardOverview() {
                     )}
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h3>
                     <p className="text-xs text-gray-500 mb-2">{product.category_name || 'Uncategorized'}</p>
-                    <p className="text-lg font-bold text-gray-900">${Number(product.price || 0).toFixed(2)}</p>
+                    <p className="text-lg font-bold text-gray-900">{Number(product.price || 0).toFixed(2)} frw</p>
                     <Link 
                       href={`/products`}
                       className="text-xs text-blue-600 hover:text-blue-700 mt-2 inline-block"
@@ -143,7 +143,7 @@ export default function DashboardOverview() {
                     )}
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h3>
                     <p className="text-xs text-gray-500 mb-2">{product.category_name || 'Uncategorized'}</p>
-                    <p className="text-lg font-bold text-gray-900">${Number(product.price || 0).toFixed(2)}</p>
+                    <p className="text-lg font-bold text-gray-900">{Number(product.price || 0).toFixed(2)} frw</p>
                     <Link 
                       href={`/products`}
                       className="text-xs text-blue-600 hover:text-blue-700 mt-2 inline-block"

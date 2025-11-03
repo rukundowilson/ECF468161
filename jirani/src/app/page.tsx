@@ -343,7 +343,7 @@ export default function EcommerceHomepage() {
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <span className="text-2xl font-extrabold text-gray-800">
-                          ${Number(product.price || 0).toFixed(2)}
+                          {Number(product.price || 0).toFixed(2)} frw
                         </span>
                       </div>
                     </div>
@@ -413,7 +413,7 @@ export default function EcommerceHomepage() {
                     <h3 className="font-bold text-gray-900 mb-3 text-lg line-clamp-2">{product.name}</h3>
                     <div className="flex items-center gap-3 mb-4">
                       <span className="text-2xl font-extrabold text-gray-800">
-                        ${Number(product.price || 0).toFixed(2)}
+                        {Number(product.price || 0).toFixed(2)} frw
                       </span>
                     </div>
                     <button

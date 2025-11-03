@@ -2,18 +2,32 @@
 
 import { useState, useEffect } from 'react';
 import { ProductService } from '../services/productService';
+import { CategoryService } from '../services/categoryService';
+import { StockService } from '../services/stockService';
 import { Product, ProductVariant, CreateProductRequest, CreateProductVariantRequest } from '../types/product';
+import { Category } from '../types/category';
+import { Stock, Warehouse, StockAdjustmentRequest } from '../types/stock';
+import { productRequiresSize, getSizeType, getSizeOptions, validateSizeFormat, usesNumericSizes, usesLetterSizes } from '../utils/categoryUtils';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [productSearch, setProductSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
+  const [autoGenerateSku, setAutoGenerateSku] = useState(true);
+  const [productInitialWarehouseId, setProductInitialWarehouseId] = useState<number | ''>('');
+  const [productInitialQty, setProductInitialQty] = useState<number>(0);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   // Form states
   const [productForm, setProductForm] = useState<CreateProductRequest>({
@@ -24,6 +38,8 @@ export default function ProductsPage() {
     brand: '',
     price: 0,
     active: 1,
+    is_jirani_recommended: 0,
+    show_in_new_arrivals: 0,
   });
 
   const [variantForm, setVariantForm] = useState<CreateProductVariantRequest>({
@@ -32,10 +48,70 @@ export default function ProductsPage() {
     additional_price: 0,
     active: 1,
   });
+  const [attributePairs, setAttributePairs] = useState<Array<{key: string, value: string}>>([{key: '', value: ''}]);
+  const [autoGenerateVariantSku, setAutoGenerateVariantSku] = useState(true);
+  const [generatedVariantSku, setGeneratedVariantSku] = useState('');
+  const [variantImageFile, setVariantImageFile] = useState<File | null>(null);
+  const [variantImagePreview, setVariantImagePreview] = useState<string | null>(null);
+  const [variantInitialWarehouseId, setVariantInitialWarehouseId] = useState<number | ''>('');
+  const [variantInitialQty, setVariantInitialQty] = useState<number>(0);
+  
+  // Helper function to get category size information
+  const getCategorySizeInfo = (product: Product) => {
+    if (!product || !product.category) return null;
+    
+    const { requires_size, size_type, size_options } = product.category;
+    
+    if (requires_size !== 1) return null;
+    
+    let sizeOptions: string[] = [];
+    
+    if (size_options) {
+      if (Array.isArray(size_options)) {
+        // Already an array
+        sizeOptions = size_options;
+      } else if (typeof size_options === 'string') {
+        try {
+          // Try to parse as JSON first
+          sizeOptions = JSON.parse(size_options);
+        } catch (error) {
+          // If JSON parsing fails, try to split by comma (fallback for old format)
+          try {
+            sizeOptions = size_options.split(',').map(option => option.trim()).filter(option => option.length > 0);
+          } catch (splitError) {
+            console.error('Error parsing size options:', splitError);
+            sizeOptions = [];
+          }
+        }
+      }
+    }
+    
+    return {
+      requiresSize: true,
+      sizeType: size_type,
+      sizeOptions: sizeOptions.length > 0 ? sizeOptions : getSizeOptions(product.category_name, product.category)
+    };
+  };
+  
+  // Stock management state
+  const [stockLevels, setStockLevels] = useState<Stock[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [stockAdjustment, setStockAdjustment] = useState<StockAdjustmentRequest>({
+    product_id: 0,
+    variant_id: null,
+    warehouse_id: 0,
+    new_quantity: 0,
+    reason: '',
+    created_by: 'admin'
+  });
 
-  // Load products on component mount
+  // Load products and categories on component mount
   useEffect(() => {
     loadProducts();
+    loadCategories();
+    loadWarehouses();
   }, []);
 
   // Load variants when a product is selected
@@ -44,6 +120,39 @@ export default function ProductsPage() {
       loadVariants(selectedProduct.id);
     }
   }, [selectedProduct]);
+
+  // Generate initial variant SKU when form opens
+  useEffect(() => {
+    if (showVariantForm && selectedProduct && autoGenerateVariantSku) {
+      generateVariantSku(selectedProduct.sku, {});
+    }
+  }, [showVariantForm, selectedProduct, autoGenerateVariantSku]);
+
+  // Initialize variant form when modal opens
+  useEffect(() => {
+    if (showVariantForm && selectedProduct) {
+      setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
+      
+      // Check if the selected product category requires size
+      const requiresSize = productRequiresSize(selectedProduct);
+      
+      if (requiresSize) {
+        // Pre-fill size field with proper configuration
+        setAttributePairs([{key: 'size', value: ''}]);
+      } else {
+        // Start with empty attribute pair for non-size categories
+        setAttributePairs([{key: '', value: ''}]);
+      }
+      
+      setAutoGenerateVariantSku(true);
+      setGeneratedVariantSku('');
+      
+      // Generate initial SKU if auto-generate is enabled
+      if (autoGenerateVariantSku) {
+        generateVariantSku(selectedProduct.sku, {});
+      }
+    }
+  }, [showVariantForm, selectedProduct, autoGenerateVariantSku]);
 
   const loadProducts = async () => {
     try {
@@ -62,14 +171,39 @@ export default function ProductsPage() {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      const data = await CategoryService.getCategories();
+      setCategories(data);
+    } catch (err: any) {
+      console.error('Failed to load categories:', err.message);
+      setCategories([]);
+    }
+  };
+
+  const loadWarehouses = async () => {
+    try {
+      const data = await StockService.getWarehouses();
+      setWarehouses(data);
+    } catch (err: any) {
+      console.error('Failed to load warehouses:', err.message);
+      setWarehouses([]);
+    }
+  };
+
   const loadVariants = async (productId: number) => {
     try {
       setLoading(true);
       setError(null);
       const data = await ProductService.getProductVariants(productId);
+      console.log('Loaded variants data:', data); // Debug log
       // Ensure we have a valid array and filter out any invalid variants
       const validVariants = Array.isArray(data) ? data.filter(variant => variant && variant.id) : [];
+      console.log('Valid variants:', validVariants); // Debug log
       setVariants(validVariants);
+      
+      // Load stock levels for this product
+      await loadStockLevels(productId);
     } catch (err: any) {
       setError(err.message || 'Failed to load variants');
       setVariants([]); // Set empty array on error
@@ -78,14 +212,56 @@ export default function ProductsPage() {
     }
   };
 
+  const loadStockLevels = async (productId: number) => {
+    try {
+      const data = await StockService.getStockByProduct(productId);
+      setStockLevels(data);
+    } catch (err: any) {
+      console.error('Failed to load stock levels:', err.message);
+      setStockLevels([]);
+    }
+  };
+
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       setError(null);
-      const newProduct = await ProductService.createProduct(productForm);
+      
+      // Prepare product data - don't send SKU if auto-generating
+      const productData: any = { ...productForm };
+      if (autoGenerateSku) {
+        delete productData.sku; // Let backend generate SKU
+      }
+
+      // Upload image first if selected
+      if (imageFile) {
+        const uploaded = await ProductService.uploadProductImage(imageFile);
+        productData.image_url = uploaded.url;
+      }
+      
+      const newProduct = await ProductService.createProduct(productData);
       setProducts([...products, newProduct]);
-      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1 });
+      // Optional initial stock for product (only if quantity > 0 and warehouse selected)
+      if (productInitialWarehouseId && productInitialQty > 0) {
+        try {
+          await StockService.adjustStock({
+            product_id: newProduct.id,
+            variant_id: null,
+            warehouse_id: Number(productInitialWarehouseId),
+            new_quantity: productInitialQty,
+            reason: 'Initial stock',
+            created_by: 'admin'
+          });
+        } catch (e) {
+          console.error('Initial stock (product) failed:', (e as any)?.message || e);
+        }
+      }
+      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+      setProductInitialWarehouseId('');
+      setProductInitialQty(0);
+      setImageFile(null);
+      setImagePreview(null);
       setShowCreateForm(false);
     } catch (err: any) {
       setError(err.message || 'Failed to create product');
@@ -101,10 +277,17 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       setError(null);
-      const updatedProduct = await ProductService.updateProduct(editingProduct.id, productForm);
+      const updateData: any = { ...productForm };
+      if (imageFile) {
+        const uploaded = await ProductService.uploadProductImage(imageFile);
+        updateData.image_url = uploaded.url;
+      }
+      const updatedProduct = await ProductService.updateProduct(editingProduct.id, updateData);
       setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
       setEditingProduct(null);
-      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1 });
+      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+      setImageFile(null);
+      setImagePreview(null);
     } catch (err: any) {
       setError(err.message || 'Failed to update product');
     } finally {
@@ -138,9 +321,76 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       setError(null);
-      const newVariant = await ProductService.createProductVariant(selectedProduct.id, variantForm);
+      
+      // Build attributes from attribute pairs
+      const attributes: Record<string, any> = {};
+      attributePairs.forEach(pair => {
+        if (pair.key && pair.value && pair.key.trim() && pair.value.trim()) {
+          attributes[pair.key.trim()] = pair.value.trim();
+        }
+      });
+      
+      // Prepare variant data
+      const variantData = { 
+        ...variantForm, 
+        attributes,
+        sku: autoGenerateVariantSku ? (generatedVariantSku || variantForm.sku) : variantForm.sku
+      };
+      
+      // Validate required fields
+      if (!variantData.sku.trim()) {
+        setError('SKU is required for variant');
+        return;
+      }
+      
+      // Validate that size attribute is present and not empty (only for categories that require it)
+      const requiresSize = selectedProduct ? productRequiresSize(selectedProduct) : false;
+      if (requiresSize && (!attributes.size || !attributes.size.trim())) {
+        setError(`Size is required for variants in the '${selectedProduct?.category_name}' category`);
+        return;
+      }
+      
+      // Validate size format if size is provided
+      if (requiresSize && attributes.size && !validateSizeFormat(attributes.size, selectedProduct.category_name, selectedProduct.category)) {
+        const sizeType = getSizeType(selectedProduct.category_name, selectedProduct.category);
+        const sizeOptions = getSizeOptions(selectedProduct.category_name, selectedProduct.category);
+        setError(`Invalid size format for ${selectedProduct.category_name}. Expected ${sizeType} sizes like: ${sizeOptions.slice(0, 5).join(', ')}...`);
+        return;
+      }
+      
+      console.log('Sending variant data:', variantData); // Debug log
+      console.log('Attribute pairs:', attributePairs); // Debug log
+      
+      // Upload variant image if present
+      if (variantImageFile) {
+        const uploaded = await ProductService.uploadProductImage(variantImageFile);
+        variantData.image_url = uploaded.url;
+      }
+      const newVariant = await ProductService.createProductVariant(selectedProduct.id, variantData);
+      console.log('Received new variant:', newVariant); // Debug log
       setVariants([...variants, newVariant]);
+      // Optional initial stock for variant (only if quantity > 0 and warehouse selected)
+      if (variantInitialWarehouseId && variantInitialQty > 0 && selectedProduct) {
+        try {
+          await StockService.adjustStock({
+            product_id: selectedProduct.id,
+            variant_id: newVariant.id,
+            warehouse_id: Number(variantInitialWarehouseId),
+            new_quantity: variantInitialQty,
+            reason: 'Initial stock',
+            created_by: 'admin'
+          });
+        } catch (e) {
+          console.error('Initial stock (variant) failed:', (e as any)?.message || e);
+        }
+      }
       setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
+      setAttributePairs([{key: '', value: ''}]);
+      setGeneratedVariantSku('');
+      setVariantInitialWarehouseId('');
+      setVariantInitialQty(0);
+      setVariantImageFile(null);
+      setVariantImagePreview(null);
       setShowVariantForm(false);
     } catch (err: any) {
       setError(err.message || 'Failed to create variant');
@@ -156,10 +406,56 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       setError(null);
-      const updatedVariant = await ProductService.updateProductVariant(editingVariant.id, variantForm);
+      
+      // Build attributes from attribute pairs
+      const attributes: Record<string, any> = {};
+      attributePairs.forEach(pair => {
+        if (pair.key && pair.value && pair.key.trim() && pair.value.trim()) {
+          attributes[pair.key.trim()] = pair.value.trim();
+        }
+      });
+      
+      // Prepare variant data
+      const variantData = { 
+        ...variantForm, 
+        attributes
+      };
+      
+      // Validate required fields
+      if (!variantData.sku.trim()) {
+        setError('SKU is required for variant');
+        return;
+      }
+      
+      // Validate that size attribute is present and not empty (only for categories that require it)
+      const requiresSize = selectedProduct ? productRequiresSize(selectedProduct) : false;
+      if (requiresSize && (!attributes.size || !attributes.size.trim())) {
+        setError(`Size is required for variants in the '${selectedProduct?.category_name}' category`);
+        return;
+      }
+      
+      // Validate size format if size is provided
+      if (requiresSize && attributes.size && !validateSizeFormat(attributes.size, selectedProduct?.category_name, selectedProduct?.category)) {
+        const sizeType = getSizeType(selectedProduct?.category_name, selectedProduct?.category);
+        const sizeOptions = getSizeOptions(selectedProduct?.category_name, selectedProduct?.category);
+        setError(`Invalid size format for ${selectedProduct?.category_name}. Expected ${sizeType} sizes like: ${sizeOptions.slice(0, 5).join(', ')}...`);
+        return;
+      }
+      
+      console.log('Updating variant with data:', variantData); // Debug log
+      
+      // Upload variant image if present
+      if (variantImageFile) {
+        const uploaded = await ProductService.uploadProductImage(variantImageFile);
+        variantData.image_url = uploaded.url;
+      }
+      const updatedVariant = await ProductService.updateProductVariant(editingVariant.id, variantData);
       setVariants(variants.map(v => v.id === editingVariant.id ? updatedVariant : v));
       setEditingVariant(null);
       setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
+      setAttributePairs([{key: '', value: ''}]);
+      setVariantImageFile(null);
+      setVariantImagePreview(null);
     } catch (err: any) {
       setError(err.message || 'Failed to update variant');
     } finally {
@@ -192,7 +488,10 @@ export default function ProductsPage() {
       brand: product.brand || '',
       price: product.price,
       active: product.active,
+      is_jirani_recommended: product.is_jirani_recommended || 0,
+      show_in_new_arrivals: product.show_in_new_arrivals || 0,
     });
+    setAutoGenerateSku(false); // When editing, allow manual SKU editing
   };
 
   const startEditVariant = (variant: ProductVariant) => {
@@ -203,14 +502,172 @@ export default function ProductsPage() {
       additional_price: variant.additional_price,
       active: variant.active,
     });
+    
+    // Convert attributes to key-value pairs
+    const pairs = Object.entries(variant.attributes || {}).map(([key, value]) => ({
+      key,
+      value: String(value)
+    }));
+    
+    // Ensure size is always first if it exists and category requires it, otherwise add it
+    const requiresSize = selectedProduct ? productRequiresSize(selectedProduct) : false;
+    const sizePair = pairs.find(pair => pair.key === 'size');
+    const otherPairs = pairs.filter(pair => pair.key !== 'size');
+    
+    if (requiresSize) {
+      if (sizePair) {
+        setAttributePairs([sizePair, ...otherPairs]);
+      } else {
+        setAttributePairs([{key: 'size', value: ''}, ...otherPairs]);
+      }
+    } else {
+      setAttributePairs(pairs.length > 0 ? pairs : [{key: '', value: ''}]);
+    }
+    
+    // When editing, allow manual SKU editing
+    setAutoGenerateVariantSku(false);
+    setGeneratedVariantSku('');
   };
 
   const cancelEdit = () => {
     setEditingProduct(null);
     setEditingVariant(null);
-    setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1 });
+    setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, is_jirani_recommended: 0, show_in_new_arrivals: 0 });
     setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
+    setAttributePairs([{key: '', value: ''}]);
+    setAutoGenerateSku(true);
+    setAutoGenerateVariantSku(true);
+    setGeneratedVariantSku('');
   };
+
+  // Helper functions for attribute pairs
+  const addAttributePair = () => {
+    setAttributePairs([...attributePairs, {key: '', value: ''}]);
+  };
+
+  const removeAttributePair = (index: number) => {
+    // Prevent removal of the first attribute if it's 'size' and category requires it
+    const requiresSize = selectedProduct ? productRequiresSize(selectedProduct) : false;
+    const isSizeField = attributePairs[index]?.key === 'size';
+    
+    if (attributePairs.length > 1 && !(index === 0 && isSizeField && requiresSize)) {
+      setAttributePairs(attributePairs.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateAttributePair = (index: number, field: 'key' | 'value', value: string) => {
+    const updated = [...attributePairs];
+    
+    // Prevent changing the 'size' key for the first attribute if category requires it
+    const requiresSize = selectedProduct ? productRequiresSize(selectedProduct) : false;
+    if (field === 'key' && index === 0 && updated[index].key === 'size' && requiresSize) {
+      return; // Don't allow changing the size key
+    }
+    
+    updated[index][field] = value;
+    setAttributePairs(updated);
+    
+    // Update variantForm attributes - always update, even with empty values
+    const attributes: Record<string, any> = {};
+    updated.forEach(pair => {
+      if (pair.key && pair.value && pair.key.trim() && pair.value.trim()) {
+        attributes[pair.key.trim()] = pair.value.trim();
+      }
+    });
+    
+    console.log('Updated attributes:', attributes); // Debug log
+    setVariantForm(prev => ({ ...prev, attributes }));
+    
+    // Generate SKU if auto-generation is enabled
+    if (autoGenerateVariantSku && selectedProduct) {
+      generateVariantSku(selectedProduct.sku, attributes);
+    }
+  };
+
+  const generateVariantSku = (productSku: string, attributes: Record<string, any>) => {
+    // Use the existing product's SKU as base
+    let baseSku = productSku;
+    
+    // Add attribute values to SKU
+    const attributeValues = Object.values(attributes)
+      .filter(value => value && String(value).trim())
+      .map(value => String(value).toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3))
+      .join('-');
+    
+    if (attributeValues) {
+      baseSku += `-${attributeValues}`;
+    }
+    
+    // Add timestamp for uniqueness
+    const timestamp = Date.now().toString().slice(-4);
+    const generatedSku = `${baseSku}-${timestamp}`;
+    
+    setGeneratedVariantSku(generatedSku);
+    setVariantForm({ ...variantForm, sku: generatedSku });
+  };
+
+  // Stock management functions
+  const openStockModal = (variant: ProductVariant | null = null) => {
+    setSelectedVariant(variant);
+    setStockAdjustment({
+      product_id: selectedProduct?.id || 0,
+      variant_id: variant?.id || null,
+      warehouse_id: warehouses[0]?.id || 0,
+      new_quantity: 0,
+      reason: '',
+      created_by: 'admin'
+    });
+    setShowStockModal(true);
+  };
+
+  const handleStockAdjustment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await StockService.adjustStock(stockAdjustment);
+      
+      // Reload stock levels
+      await loadStockLevels(selectedProduct.id);
+      
+      setShowStockModal(false);
+      setStockAdjustment({
+        product_id: 0,
+        variant_id: null,
+        warehouse_id: 0,
+        new_quantity: 0,
+        reason: '',
+        created_by: 'admin'
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to adjust stock');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStockForVariant = (variantId: number | null) => {
+    return stockLevels.filter(stock => 
+      stock.variant_id === variantId && 
+      stock.product_id === selectedProduct?.id
+    );
+  };
+
+  const getTotalStockForProduct = () => {
+    return stockLevels
+      .filter(stock => stock.product_id === selectedProduct?.id)
+      .reduce((total, stock) => total + stock.quantity_on_hand, 0);
+  };
+
+  useEffect(() => {
+    if (!showImagePreview) return;
+    function handleKey(e: KeyboardEvent) { if (e.key === "Escape") setShowImagePreview(false); }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [showImagePreview]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 text-black">
@@ -226,18 +683,32 @@ export default function ProductsPage() {
           </div>
         )}
 
+        {/* Stock Summary removed per UX preference */}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Products Section */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
+            <div className="p-4 md:p-6 border-b border-gray-200">
+              <div className="flex flex-col md:flex-row gap-3 md:gap-4 md:items-center md:justify-between">
                 <h2 className="text-xl font-semibold text-black">Products</h2>
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Add Product
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                  <div className="relative flex-1 md:w-72">
+                    <input
+                      type="text"
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      placeholder="Search by name, SKU, brand..."
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    />
+                    <span className="absolute right-2 top-2.5 text-gray-400 text-sm">⌕</span>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateForm(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Add Product
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -246,18 +717,38 @@ export default function ProductsPage() {
                 <div className="text-center py-4">Loading...</div>
               ) : (
                 <div className="space-y-3">
-                  {products.filter(product => product && product.id).map((product, index) => (
+                  {products
+                    .filter(product => product && product.id)
+                    .filter(p => {
+                      if (!productSearch.trim()) return true;
+                      const q = productSearch.trim().toLowerCase();
+                      return (
+                        (p.name || '').toLowerCase().includes(q) ||
+                        (p.sku || '').toLowerCase().includes(q) ||
+                        (p.brand || '').toLowerCase().includes(q)
+                      );
+                    })
+                    .map((product, index) => (
                     <div
                       key={product.id || index}
-                      className={`p-4 border rounded cursor-pointer transition-colors ${
+                      className={`p-4 border rounded-lg cursor-pointer transition ${
                         selectedProduct?.id === product.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-blue-500 bg-blue-50 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                       }`}
                       onClick={() => setSelectedProduct(product)}
                     >
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div className="flex items-start space-x-3">
+                          {product.image_url && (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="h-14 w-14 object-cover rounded cursor-pointer"
+                              onClick={() => { setImagePreviewUrl(product.image_url!); setShowImagePreview(true); }}
+                            />
+                          )}
+                          <div>
                           <h3 className="font-medium text-black">{product.name || 'Unnamed Product'}</h3>
                           <p className="text-sm text-black mt-1">{product.description || 'No description'}</p>
                           <p className="text-xs text-gray-600 mt-1">
@@ -266,6 +757,7 @@ export default function ProductsPage() {
                           <p className="text-xs text-gray-600">
                             Category: {product.category_name || 'N/A'} | Brand: {product.brand || 'N/A'}
                           </p>
+                          </div>
                         </div>
                         <div className="flex space-x-2">
                           <button
@@ -297,7 +789,7 @@ export default function ProductsPage() {
 
           {/* Variants Section */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-4 md:p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-black">
                   Variants {selectedProduct && `- ${selectedProduct.name}`}
@@ -313,7 +805,7 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               {!selectedProduct ? (
                 <div className="text-center py-8 text-gray-600">
                   Select a product to view its variants
@@ -323,32 +815,92 @@ export default function ProductsPage() {
               ) : (
                 <div className="space-y-3">
                   {variants.filter(variant => variant && variant.id).map((variant) => (
-                    <div key={variant.id} className="p-4 border border-gray-200 rounded">
+                    <div key={variant.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition">
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div className="flex items-start space-x-3">
+                          <img
+                            src={variant.image_url}
+                            alt={variant.sku}
+                            className="h-12 w-12 object-cover rounded cursor-pointer"
+                            onClick={() => { setImagePreviewUrl(variant.image_url!); setShowImagePreview(true); }}
+                          />
+                          <div>
                           <h3 className="font-medium text-black">SKU: {variant.sku}</h3>
                           <p className="text-sm text-black">
                             Additional Price: ${variant.additional_price}
                           </p>
-                          <p className="text-sm text-black">
-                            Attributes: {variant.attributes ? JSON.stringify(variant.attributes) : 'None'}
-                          </p>
+                          <div className="text-sm text-black">
+                            <span className="font-medium">Attributes:</span>
+                            {variant.attributes && Object.keys(variant.attributes).length > 0 ? (
+                              <div className="mt-1">
+                                {Object.entries(variant.attributes).map(([key, value]) => {
+                                  const isSizeField = key === 'size';
+                                  const isRequired = isSizeField && selectedProduct && productRequiresSize(selectedProduct);
+                                  return (
+                                    <span 
+                                      key={key} 
+                                      className={`inline-block px-2 py-1 rounded text-xs mr-1 mb-1 ${
+                                        isSizeField && isRequired
+                                          ? 'bg-blue-100 text-blue-800 font-medium' 
+                                          : 'bg-gray-100'
+                                      }`}
+                                    >
+                                      {key}: {String(value)}
+                                      {isSizeField && isRequired && <span className="ml-1 text-blue-600">*</span>}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <span className="text-gray-500">None</span>
+                            )}
+                          </div>
+                          <div className="text-sm text-black mt-2">
+                            <span className="font-medium">Stock:</span>
+                            {getStockForVariant(variant.id).length > 0 ? (
+                              <div className="mt-1">
+                                {getStockForVariant(variant.id).map((stock) => (
+                                  <div key={stock.id} className="flex items-center space-x-2">
+                                    <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+                                      {stock.warehouse_name}: {stock.quantity_on_hand} units
+                                    </span>
+                                    {stock.quantity_reserved > 0 && (
+                                      <span className="text-xs bg-yellow-100 px-2 py-1 rounded">
+                                        Reserved: {stock.quantity_reserved}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-500">No stock</span>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-600">
                             Status: {variant.active ? 'Active' : 'Inactive'}
                           </p>
+                          </div>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col space-y-1">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => startEditVariant(variant)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteVariant(variant.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
                           <button
-                            onClick={() => startEditVariant(variant)}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
+                            onClick={() => openStockModal(variant)}
+                            className="text-green-600 hover:text-green-800 text-sm font-medium"
                           >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteVariant(variant.id)}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Delete
+                            Manage Stock
                           </button>
                         </div>
                       </div>
@@ -362,22 +914,73 @@ export default function ProductsPage() {
 
         {/* Create/Edit Product Modal */}
         {(showCreateForm || editingProduct) && (
-          <div className="fixed inset-0 text-black bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 text-black bg-black/70 flex items-center justify-center z-50 overflow-y-auto p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md my-auto max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-semibold mb-4">
                 {editingProduct ? 'Edit Product' : 'Create Product'}
               </h3>
               <form onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-black">SKU</label>
+                    <label className="block text-sm font-medium text-black">Product Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setImageFile(file);
+                        setImagePreview(file ? URL.createObjectURL(file) : null);
+                      }}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    />
+                    {imagePreview && (
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="mt-2 h-24 w-24 object-cover rounded cursor-pointer"
+                        onClick={() => {
+                          setImagePreviewUrl(imagePreview!); setShowImagePreview(true);
+                        }}
+                      />
+                    )}
+                    {editingProduct?.image_url && !imagePreview && (
+                      <img
+                        src={editingProduct.image_url}
+                        alt={editingProduct.name}
+                        className="mt-2 h-24 w-24 object-cover rounded cursor-pointer"
+                        onClick={() => {
+                          setImagePreviewUrl(editingProduct.image_url!); setShowImagePreview(true);
+                        }}
+                      />
+                    )}
+                  </div>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <input
+                        type="checkbox"
+                        id="autoGenerateSku"
+                        checked={autoGenerateSku}
+                        onChange={(e) => setAutoGenerateSku(e.target.checked)}
+                        className="rounded"
+                      />
+                      <label htmlFor="autoGenerateSku" className="text-sm font-medium text-black">
+                        Auto-generate SKU
+                      </label>
+                    </div>
                     <input
                       type="text"
                       value={productForm.sku}
                       onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      required
+                      className={`mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 ${
+                        autoGenerateSku ? 'bg-gray-100 text-gray-500' : ''
+                      }`}
+                      disabled={autoGenerateSku}
+                      placeholder={autoGenerateSku ? "SKU will be auto-generated from product name" : "Enter SKU"}
                     />
+                    {autoGenerateSku && (
+                      <p className="mt-1 text-xs text-gray-500">
+                        SKU will be generated automatically based on the product name
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-black">Name</label>
@@ -401,14 +1004,20 @@ export default function ProductsPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-black">Category ID</label>
-                      <input
-                        type="number"
+                      <label className="block text-sm font-medium text-black">Category</label>
+                      <select
                         value={productForm.category_id || ''}
                         onChange={(e) => setProductForm({ ...productForm, category_id: parseInt(e.target.value) || 0 })}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
-                      />
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-black">Brand</label>
@@ -444,7 +1053,59 @@ export default function ProductsPage() {
                       </select>
                     </div>
                   </div>
-                </div>
+                  {/* Optional initial stock for new product */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black">Initial Warehouse (optional)</label>
+                      <select
+                        value={productInitialWarehouseId}
+                        onChange={(e) => setProductInitialWarehouseId(e.target.value ? Number(e.target.value) : '')}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="">Select warehouse</option>
+                        {warehouses.map((w) => (
+                          <option key={w.id} value={w.id}>{w.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black">Initial Quantity (optional)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={productInitialQty}
+                        onChange={(e) => setProductInitialQty(parseInt(e.target.value) || 0)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                  {/* Product Flags */}
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="is_jirani_recommended"
+                        checked={productForm.is_jirani_recommended === 1}
+                        onChange={(e) => setProductForm({ ...productForm, is_jirani_recommended: e.target.checked ? 1 : 0 })}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="is_jirani_recommended" className="ml-2 block text-sm font-medium text-black">
+                        💎 Mark as Jirani Recommended (Show in Jirani Picks)
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="show_in_new_arrivals"
+                        checked={productForm.show_in_new_arrivals === 1}
+                        onChange={(e) => setProductForm({ ...productForm, show_in_new_arrivals: e.target.checked ? 1 : 0 })}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="show_in_new_arrivals" className="ml-2 block text-sm font-medium text-black">
+                        ✨ Show in New Arrivals
+                      </label>
+                    </div>
+                  </div>
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     type="button"
@@ -471,22 +1132,83 @@ export default function ProductsPage() {
 
         {/* Create/Edit Variant Modal */}
         {(showVariantForm || editingVariant) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
               <h3 className="text-lg font-semibold mb-4">
                 {editingVariant ? 'Edit Variant' : 'Create Variant'}
+                {selectedProduct && !editingVariant && ` for ${selectedProduct.name}`}
               </h3>
+              {selectedProduct && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-gray-700">
+                    <div className="font-medium">Category: {selectedProduct.category_name}</div>
+                    {(() => {
+                      const sizeInfo = getCategorySizeInfo(selectedProduct);
+                      if (sizeInfo) {
+                        return (
+                          <div className="mt-1">
+                            <div className="text-blue-700">
+                              <span className="font-medium">Size Required:</span> Yes
+                              {sizeInfo.sizeType && (
+                                <span className="ml-2">
+                                  ({sizeInfo.sizeType === 'numeric' ? 'Numeric' : 'Letter'} sizes)
+                                </span>
+                              )}
+                            </div>
+                            {sizeInfo.sizeOptions.length > 0 && (
+                              <div className="mt-1 text-xs text-gray-600">
+                                Available sizes: {sizeInfo.sizeOptions.slice(0, 5).join(', ')}
+                                {sizeInfo.sizeOptions.length > 5 && ` +${sizeInfo.sizeOptions.length - 5} more`}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="mt-1 text-gray-600">Size Required: No</div>
+                        );
+                      }
+                    })()}
+                  </div>
+                </div>
+              )}
               <form onSubmit={editingVariant ? handleUpdateVariant : handleCreateVariant}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-black">SKU</label>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <input
+                        type="checkbox"
+                        id="autoGenerateVariantSku"
+                        checked={autoGenerateVariantSku}
+                        onChange={(e) => {
+                          setAutoGenerateVariantSku(e.target.checked);
+                          if (e.target.checked && selectedProduct) {
+                            generateVariantSku(selectedProduct.sku, variantForm.attributes);
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <label htmlFor="autoGenerateVariantSku" className="text-sm font-medium text-black">
+                        Auto-generate SKU from product SKU and attributes
+                      </label>
+                    </div>
                     <input
                       type="text"
                       value={variantForm.sku}
                       onChange={(e) => setVariantForm({ ...variantForm, sku: e.target.value })}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      required
+                      className={`mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 ${
+                        autoGenerateVariantSku ? 'bg-gray-100 text-gray-500' : ''
+                      }`}
+                      disabled={autoGenerateVariantSku}
+                      placeholder={autoGenerateVariantSku ? "SKU will be auto-generated" : "Enter SKU"}
                     />
+                    {autoGenerateVariantSku && generatedVariantSku && (
+                      <p className="mt-1 text-xs text-gray-500">
+                        Generated SKU: <span className="font-mono bg-gray-200 px-1 rounded">{generatedVariantSku}</span>
+                        <br />
+                        <span className="text-gray-400">Based on product SKU: {selectedProduct?.sku}</span>
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-black">Additional Price</label>
@@ -500,21 +1222,143 @@ export default function ProductsPage() {
                       />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-black">Attributes (JSON)</label>
-                    <textarea
-                      value={JSON.stringify(variantForm.attributes, null, 2)}
+                    <label className="block text-sm font-medium text-black">Variant Image (optional)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
                       onChange={(e) => {
-                        try {
-                          const parsed = JSON.parse(e.target.value);
-                          setVariantForm({ ...variantForm, attributes: parsed });
-                        } catch (err) {
-                          // Invalid JSON, keep the text as is for now
-                        }
+                        const file = e.target.files?.[0] || null;
+                        setVariantImageFile(file);
+                        setVariantImagePreview(file ? URL.createObjectURL(file) : null);
                       }}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      rows={4}
-                      placeholder='{"color": "red", "size": "large"}'
                     />
+                    {variantImagePreview && (
+                      <img
+                        src={variantImagePreview}
+                        alt="Preview"
+                        className="mt-2 h-24 w-24 object-cover rounded cursor-pointer"
+                        onClick={() => {
+                          setImagePreviewUrl(variantImagePreview!); setShowImagePreview(true);
+                        }}
+                      />
+                    )}
+                    {editingVariant?.image_url && (
+                      <img
+                        src={editingVariant.image_url}
+                        alt={editingVariant.sku}
+                        className="mt-2 h-24 w-24 object-cover rounded cursor-pointer"
+                        onClick={() => {
+                          setImagePreviewUrl(editingVariant.image_url!); setShowImagePreview(true);
+                        }}
+                      />
+                    )}
+                  </div>
+                  {/* Optional initial stock for new variant */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black">Initial Warehouse (optional)</label>
+                      <select
+                        value={variantInitialWarehouseId}
+                        onChange={(e) => setVariantInitialWarehouseId(e.target.value ? Number(e.target.value) : '')}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="">Select warehouse</option>
+                        {warehouses.map((w) => (
+                          <option key={w.id} value={w.id}>{w.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black">Initial Quantity (optional)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={variantInitialQty}
+                        onChange={(e) => setVariantInitialQty(parseInt(e.target.value) || 0)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Attributes {selectedProduct && productRequiresSize(selectedProduct) && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="space-y-2">
+                      {attributePairs.map((pair, index) => {
+                        const isSizeField = pair.key === 'size';
+                        const isRequired = isSizeField && selectedProduct && productRequiresSize(selectedProduct);
+                        return (
+                          <div key={index} className="flex space-x-2">
+                            <input
+                              type="text"
+                              placeholder={isSizeField ? "size (required)" : "Key (e.g., color)"}
+                              value={pair.key}
+                              onChange={(e) => updateAttributePair(index, 'key', e.target.value)}
+                              className={`flex-1 border rounded-md px-3 py-2 text-sm ${
+                                isSizeField && isRequired
+                                  ? 'border-gray-300 bg-gray-50' 
+                                  : 'border-gray-300'
+                              }`}
+                              disabled={!!(isSizeField && isRequired)}
+                            />
+                            {isSizeField && isRequired ? (
+                              <select
+                                value={pair.value}
+                                onChange={(e) => updateAttributePair(index, 'value', e.target.value)}
+                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                required={!!isRequired}
+                              >
+                                <option value="">Select size</option>
+                                {selectedProduct && getSizeOptions(selectedProduct.category_name, selectedProduct.category).map((size) => (
+                                  <option key={size} value={size}>{size}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                placeholder={isSizeField ? "Value (e.g., large)" : "Value (e.g., red)"}
+                                value={pair.value}
+                                onChange={(e) => updateAttributePair(index, 'value', e.target.value)}
+                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                required={!!isRequired}
+                              />
+                            )}
+                            {attributePairs.length > 1 && !(isSizeField && isRequired) && (
+                              <button
+                                type="button"
+                                onClick={() => removeAttributePair(index)}
+                                className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        onClick={addAttributePair}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        + Add Attribute
+                      </button>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {selectedProduct && productRequiresSize(selectedProduct) ? (
+                        <>
+                          <span className="text-red-500">*</span> Size is required for variants in the '{selectedProduct?.category_name}' category. 
+                          {selectedProduct?.category_name && (
+                            <>
+                              {' '}Use {getSizeType(selectedProduct.category_name, selectedProduct.category)} sizes: {getSizeOptions(selectedProduct.category_name, selectedProduct.category).slice(0, 3).join(', ')}...
+                            </>
+                          )}
+                          {' '}Add additional attributes as needed (e.g., color: red).
+                        </>
+                      ) : (
+                        <>Add key-value pairs for variant attributes (e.g., color: red, material: cotton).</>
+                      )}
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-black">Active</label>
@@ -551,6 +1395,92 @@ export default function ProductsPage() {
             </div>
           </div>
         )}
+
+        {/* Stock Adjustment Modal */}
+        {showStockModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">
+                {selectedVariant ? `Adjust Stock - ${selectedVariant.sku}` : `Adjust Stock - ${selectedProduct?.name}`}
+              </h3>
+              <form onSubmit={handleStockAdjustment}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black">Warehouse</label>
+                    <select
+                      value={stockAdjustment.warehouse_id}
+                      onChange={(e) => setStockAdjustment({ ...stockAdjustment, warehouse_id: parseInt(e.target.value) })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      required
+                    >
+                      <option value="">Select warehouse</option>
+                      {warehouses.map((warehouse) => (
+                        <option key={warehouse.id} value={warehouse.id}>
+                          {warehouse.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black">New Quantity</label>
+                    <input
+                      type="number"
+                      value={stockAdjustment.new_quantity}
+                      onChange={(e) => setStockAdjustment({ ...stockAdjustment, new_quantity: parseInt(e.target.value) || 0 })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      required
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black">Reason</label>
+                    <input
+                      type="text"
+                      value={stockAdjustment.reason}
+                      onChange={(e) => setStockAdjustment({ ...stockAdjustment, reason: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      placeholder="e.g., Initial stock, Purchase order, Adjustment"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowStockModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-black hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {loading ? 'Adjusting...' : 'Adjust Stock'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        {showImagePreview && imagePreviewUrl && (
+  <div
+    className="fixed inset-0 flex items-center justify-center bg-black/80 z-[999] cursor-pointer"
+    onClick={() => setShowImagePreview(false)}
+  >
+    <img
+      src={imagePreviewUrl}
+      alt="Preview"
+      className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg outline outline-2 outline-white"
+      onClick={e => e.stopPropagation()}
+    />
+    <button
+      className="absolute top-2 right-2 bg-white text-black rounded-full px-4 py-2 shadow-lg text-lg font-bold"
+      onClick={() => setShowImagePreview(false)}
+    >✕</button>
+  </div>
+)}
       </div>
     </div>
   );

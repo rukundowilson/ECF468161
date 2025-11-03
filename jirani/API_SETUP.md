@@ -66,3 +66,5 @@ const newProduct = await ProductService.createProduct({
 // Get product variants
 const variants = await ProductService.getProductVariants('product-id');
 ```
+
+

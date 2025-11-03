@@ -1,22 +1,523 @@
-import Link from "next/link";
+"use client"
+import React, { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, Search, Menu, X, Heart, User, Star, Clock, Package, ArrowRight, Shield, Truck } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ProductService } from './services/productService';
+import { Product } from './types/product';
+import { CategoryService } from './services/categoryService';
+import { Category } from './types/category';
 
-export default function Home() {
+export default function EcommerceHomepage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const lastScrollY = useRef(0);
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [jiraniPicks, setJiraniPicks] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        // Scrolling down
+        setIsScrollingDown(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        // Scrolling up
+        setIsScrollingDown(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [products, categoriesData] = await Promise.all([
+          ProductService.getProducts(),
+          CategoryService.getCategories()
+        ]);
+        
+        setCategories(categoriesData || []);
+        
+        // Filter products for New Arrivals (show_in_new_arrivals = 1 and active = 1)
+        const arrivals = (products || []).filter(p => p.show_in_new_arrivals === 1 && p.active === 1);
+        setNewArrivals(arrivals);
+        
+        // Filter products for Jirani Picks (is_jirani_recommended = 1 and active = 1)
+        const picks = (products || []).filter(p => p.is_jirani_recommended === 1 && p.active === 1);
+        setJiraniPicks(picks);
+        
+        // Debug: Log products with images
+        console.log('Products loaded:', {
+          total: products?.length || 0,
+          newArrivals: arrivals.length,
+          jiraniPicks: picks.length,
+          withImages: (products || []).filter(p => p.image_url).length,
+          sampleProduct: products?.[0]
+        });
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleCategorySelect = (categoryId: number | '') => {
+    setSelectedCategory(categoryId);
+    if (categoryId) {
+      window.location.href = `/products?category=${categoryId}`;
+    }
+  };
+
+  // Helper function to get dynamic icon and color for category
+  const getCategoryDisplay = (categoryId: number, categoryName: string) => {
+    // Dynamic icon selection based on category ID (modulo to cycle through icons)
+    const icons = ['📦', '🛍️', '✨', '🎯', '🏆', '💎', '⭐', '🔥'];
+    const iconIndex = categoryId % icons.length;
+    
+    // Dynamic color selection based on category ID
+    const colors = ['bg-blue-100', 'bg-pink-100', 'bg-green-100', 'bg-purple-100', 'bg-orange-100', 'bg-yellow-100', 'bg-indigo-100', 'bg-red-100'];
+    const colorIndex = categoryId % colors.length;
+    
+    return { 
+      icon: icons[iconIndex], 
+      color: colors[colorIndex] 
+    };
+  };
+
+  const addToCart = () => {
+    setCartCount(cartCount + 1);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white sm:items-start">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Inventory Management System</h1>
-          <p className="text-lg text-gray-600 mb-8">Manage your products, variants, and inventory</p>
-          <div className="space-x-4">
-            <Link
-              href="/products"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Manage Products
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className={`bg-white shadow-sm sticky top-0 z-50 transition-transform duration-300 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center group">
+              <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
+                Jirani
+              </h1>
             </Link>
+
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+              <div className="w-full relative">
+                <input
+                  type="text"
+                  placeholder="Search for products, brands, categories..."
+                  className="w-full px-5 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                />
+                <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+              </div>
+            </div>
+
+            {/* Right Icons */}
+            <div className="flex items-center space-x-4 md:space-x-6">
+              <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                <User size={22} />
+                <span className="text-sm">Account</span>
+              </button>
+              <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                <Heart size={22} />
+                <span className="text-sm">Wishlist</span>
+              </button>
+              <button className="relative flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                <ShoppingCart size={22} />
+                <span className="hidden md:inline text-sm">Cart</span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+              <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition" onClick={() => setMenuOpen(!menuOpen)}>
+                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Search */}
+          <div className="md:hidden pb-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products, brands..."
+                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+              />
+              <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+            </div>
           </div>
         </div>
-      </main>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <Image
+            src="/kgl_fashion.png"
+            alt="Fashion Collection - Kigali"
+            fill
+            className="object-cover"
+            priority
+            quality={90}
+          />
+          <div className="absolute inset-0 bg-gray-900/60"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left relative">
+              <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
+                Shop in Kigali & Across Rwanda
+              </h2>
+              <p className="text-xl md:text-2xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
+                Discover amazing products from local vendors across <span className="font-bold text-yellow-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <Link 
+                  href="/products"
+                  className="group bg-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
+                >
+                  Shop Now
+                  <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                </Link>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => handleCategorySelect(e.target.value ? Number(e.target.value) : '')}
+                  className="bg-gray-600/80 backdrop-blur-md text-white border-2 border-gray-400/60 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-500/80 transition-all shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  <option value="">Browse Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id} className="bg-gray-700 text-white">
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="hidden md:flex justify-center items-center">
+              <div className="text-9xl animate-pulse opacity-50 drop-shadow-2xl">🛍️</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-gradient-to-r from-gray-50 to-white py-12 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-indigo-100 p-3 rounded-lg">
+                <Truck className="text-indigo-600" size={28} />
+              </div>
+              <div>
+                <p className="font-bold text-lg text-gray-900 mb-1">Kigali Delivery</p>
+                <p className="text-sm text-gray-600">Fast delivery in 1-2 working days</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <Clock className="text-purple-600" size={28} />
+              </div>
+              <div>
+                <p className="font-bold text-lg text-gray-900 mb-1">Other Districts</p>
+                <p className="text-sm text-gray-600">Nationwide delivery in 2-4 working days</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-pink-100 p-3 rounded-lg">
+                <Shield className="text-pink-600" size={28} />
+              </div>
+              <div>
+                <p className="font-bold text-lg text-gray-900 mb-1">Self Pick-Up</p>
+                <p className="text-sm text-gray-600">Available anytime at our store</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-3">Shop by Category</h2>
+            <p className="text-lg text-gray-600">Browse our wide selection of products</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
+            {loading ? (
+              <div className="col-span-full text-center text-gray-500 py-8">Loading categories...</div>
+            ) : categories.length > 0 ? (
+              categories.map((category) => {
+                const display = getCategoryDisplay(category.id, category.name);
+                return (
+                  <Link
+                    key={category.id}
+                    href={`/products?category=${category.id}`}
+                    className={`${display.color} p-6 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 hover:-translate-y-1 text-center group cursor-pointer`}
+                  >
+                    <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">{display.icon}</div>
+                    <p className="font-bold text-gray-800 text-sm md:text-base">{category.name}</p>
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-8">
+                No categories available
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-2">New Arrivals</h2>
+              <p className="text-gray-600">Handpicked products just for you</p>
+            </div>
+            <Link 
+              href="/products"
+              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-lg hover:text-gray-800 transition group"
+            >
+              View All Products
+              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+            </Link>
+          </div>
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">Loading products...</div>
+          ) : newArrivals.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {newArrivals.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-100 group"
+                >
+                  {product.image_url && product.image_url.trim() !== '' ? (
+                    <div className="bg-gray-50 p-0 overflow-hidden relative h-64">
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          // Fallback if image fails to load
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.parentElement;
+                          if (fallback) {
+                            fallback.innerHTML = '<div class="bg-gradient-to-br from-gray-50 to-white p-12 flex items-center justify-center text-7xl w-full h-full">📦</div>';
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-gradient-to-br from-gray-50 to-white p-12 flex items-center justify-center text-7xl group-hover:scale-110 transition-transform duration-300">
+                      📦
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="font-bold text-gray-900 mb-3 text-lg line-clamp-2">{product.name}</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <span className="text-2xl font-extrabold text-gray-800">
+                          ${Number(product.price || 0).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={addToCart}
+                      className="w-full bg-orange-500 text-white py-3 px-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                    >
+                      <ShoppingCart size={20} />
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">No new arrivals at the moment. Check back soon!</div>
+          )}
+        </div>
+      </section>
+
+      {/* Trending Deals */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-2">💎jirani picks</h2>
+            </div>
+            <Link 
+              href="/products"
+              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-lg hover:text-gray-800 transition group"
+            >
+              View All Products
+              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+            </Link>
+          </div>
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">Loading products...</div>
+          ) : jiraniPicks.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {jiraniPicks.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 relative group"
+                >
+                  {product.image_url && product.image_url.trim() !== '' ? (
+                    <div className="bg-gray-50 p-0 overflow-hidden relative h-64">
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          // Fallback if image fails to load
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.parentElement;
+                          if (fallback) {
+                            fallback.innerHTML = '<div class="bg-gray-50 p-12 flex items-center justify-center text-7xl w-full h-full">📦</div>';
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 p-12 flex items-center justify-center text-7xl group-hover:scale-110 transition-transform duration-300">
+                      📦
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="font-bold text-gray-900 mb-3 text-lg line-clamp-2">{product.name}</h3>
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-2xl font-extrabold text-gray-800">
+                        ${Number(product.price || 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={addToCart}
+                      className="w-full bg-orange-500 text-white py-3 px-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                    >
+                      <ShoppingCart size={20} />
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">No Jirani picks available at the moment. Check back soon!</div>
+          )}
+        </div>
+      </section>
+
+      {/* Newsletter & Shopping Guide */}
+      <section className="border-t border-gray-300 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            {/* Newsletter */}
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-gray-900 tracking-tight">Subscribe to Our Newsletter</h2>
+              <p className="text-base text-gray-800 mb-6 font-medium">
+                Get the latest deals, exclusive offers, and new product announcements directly in your inbox.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="flex-1 px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base font-medium bg-white border border-gray-200"
+                />
+                <button className="bg-orange-500 text-white px-6 py-4 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-2 whitespace-nowrap">
+                  Subscribe
+                  <ArrowRight size={20} />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-3">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+
+            {/* Shopping Guide */}
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-gray-900 tracking-tight">Shopping Guide</h2>
+              <ul className="space-y-3 text-base text-gray-800 font-medium">
+                <li className="flex items-center gap-2">
+                  <ArrowRight size={18} className="text-gray-600" />
+                  How To Register
+                </li>
+                <li className="flex items-center gap-2">
+                  <ArrowRight size={18} className="text-gray-600" />
+                  How To Place An Order
+                </li>
+                <li className="flex items-center gap-2">
+                  <ArrowRight size={18} className="text-gray-600" />
+                  How To Pay
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12" style={{ backgroundColor: '#ececec' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-gray-900 text-xl font-bold mb-4">Jirani</h3>
+              <p className="text-sm text-gray-700">Your trusted local marketplace for quality products across Rwanda.</p>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">About Us</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Contact</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">FAQs</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-4">Customer Service</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Delivery Info</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Returns</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Track Order</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-semibold mb-4">Follow Us</h4>
+              <p className="text-sm mb-4 text-gray-700">Stay connected on social media</p>
+              <div className="flex space-x-4">
+                <button className="text-2xl hover:opacity-70 transition">📘</button>
+                <button className="text-2xl hover:opacity-70 transition">📷</button>
+                <button className="text-2xl hover:opacity-70 transition">🐦</button>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-400 mt-8 pt-8 text-center text-sm text-gray-700">
+            <p>© 2025 Jirani. All rights reserved. Serving customers across Rwanda.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

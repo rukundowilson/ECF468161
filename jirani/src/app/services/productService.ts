@@ -10,6 +10,16 @@ import {
 } from '../types/product';
 
 export class ProductService {
+  // Image upload
+  static async uploadProductImage(file: File): Promise<{ url: string }>{
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await API.post('/api/products/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.data;
+  }
+
   // Products CRUD operations
   static async getProducts(filters?: ProductFilters): Promise<Product[]> {
     const params = new URLSearchParams();

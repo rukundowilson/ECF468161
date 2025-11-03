@@ -136,7 +136,7 @@ export default function EcommerceHomepage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center group">
-              <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
+              <h1 className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
                 Jirani
               </h1>
             </Link>
@@ -212,24 +212,24 @@ export default function EcommerceHomepage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="text-center md:text-left relative">
               <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
                 Shop in Kigali & Across Rwanda
               </h2>
-              <p className="text-xl md:text-2xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
+              <p className="text-lg md:text-xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
                 Discover amazing products from local vendors across <span className="font-bold text-yellow-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link 
                   href="/products"
-                  className="group bg-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
+                  className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
                 >
                   Shop Now
-                  <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                  <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
                 </Link>
                 <select
                   value={selectedCategory}
                   onChange={(e) => handleCategorySelect(e.target.value ? Number(e.target.value) : '')}
-                  className="bg-gray-600/80 backdrop-blur-md text-white border-2 border-gray-400/60 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-500/80 transition-all shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  className="bg-gray-600/80 backdrop-blur-md text-white border-2 border-gray-400/60 px-6 py-3 rounded-xl font-semibold text-base hover:bg-gray-500/80 transition-all shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
                   <option value="">Browse Categories</option>
                   {categories.map((category) => (
@@ -253,29 +253,29 @@ export default function EcommerceHomepage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-indigo-100 p-3 rounded-lg">
-                <Truck className="text-indigo-600" size={28} />
+                <Truck className="text-indigo-600" size={24} />
               </div>
               <div>
-                <p className="font-bold text-lg text-gray-900 mb-1">Kigali Delivery</p>
-                <p className="text-sm text-gray-600">Fast delivery in 1-2 working days</p>
+                <p className="font-bold text-base text-gray-900 mb-1">Kigali Delivery</p>
+                <p className="text-xs text-gray-600">Fast delivery in 1-2 working days</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-purple-100 p-3 rounded-lg">
-                <Clock className="text-purple-600" size={28} />
+                <Clock className="text-purple-600" size={24} />
               </div>
               <div>
-                <p className="font-bold text-lg text-gray-900 mb-1">Other Districts</p>
-                <p className="text-sm text-gray-600">Nationwide delivery in 2-4 working days</p>
+                <p className="font-bold text-base text-gray-900 mb-1">Other Districts</p>
+                <p className="text-xs text-gray-600">Nationwide delivery in 2-4 working days</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-pink-100 p-3 rounded-lg">
-                <Shield className="text-pink-600" size={28} />
+                <Shield className="text-pink-600" size={24} />
               </div>
               <div>
-                <p className="font-bold text-lg text-gray-900 mb-1">Self Pick-Up</p>
-                <p className="text-sm text-gray-600">Available anytime at our store</p>
+                <p className="font-bold text-base text-gray-900 mb-1">Self Pick-Up</p>
+                <p className="text-xs text-gray-600">Available anytime at our store</p>
               </div>
             </div>
           </div>
@@ -286,8 +286,8 @@ export default function EcommerceHomepage() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-3">Shop by Category</h2>
-            <p className="text-lg text-gray-600">Browse our wide selection of products</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Shop by Category</h2>
+            <p className="text-base text-gray-600">Browse our wide selection of products</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
             {loading ? (
@@ -317,7 +317,7 @@ export default function EcommerceHomepage() {
                         <div className="text-5xl">{display.icon}</div>
                       )}
                     </div>
-                    <p className="font-bold text-gray-800 text-sm md:text-base">{category.name}</p>
+                    <p className="font-bold text-gray-800 text-xs md:text-sm">{category.name}</p>
                   </Link>
                 );
               })
@@ -335,28 +335,28 @@ export default function EcommerceHomepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">New Arrivals</h2>
-              <p className="text-gray-600">Handpicked products just for you</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">New Arrivals</h2>
+              <p className="text-sm text-gray-600">Handpicked products just for you</p>
             </div>
             <Link 
               href="/products"
-              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-lg hover:text-gray-800 transition group"
+              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-base hover:text-gray-800 transition group"
             >
               View All Products
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
             </Link>
           </div>
           {loading ? (
             <div className="text-center py-12 text-gray-500">Loading products...</div>
           ) : newArrivals.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {newArrivals.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-100 group"
+                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-100 group"
                 >
                   {product.image_url && product.image_url.trim() !== '' ? (
-                    <div className="bg-gray-50 p-0 overflow-hidden relative h-64">
+                    <div className="bg-gray-50 p-0 overflow-hidden relative h-48">
                       <img 
                         src={product.image_url} 
                         alt={product.name}
@@ -366,30 +366,30 @@ export default function EcommerceHomepage() {
                           e.currentTarget.style.display = 'none';
                           const fallback = e.currentTarget.parentElement;
                           if (fallback) {
-                            fallback.innerHTML = '<div class="bg-gradient-to-br from-gray-50 to-white p-12 flex items-center justify-center text-7xl w-full h-full">📦</div>';
+                            fallback.innerHTML = '<div class="bg-gradient-to-br from-gray-50 to-white p-8 flex items-center justify-center text-5xl w-full h-full">📦</div>';
                           }
                         }}
                       />
                     </div>
                   ) : (
-                    <div className="bg-gradient-to-br from-gray-50 to-white p-12 flex items-center justify-center text-7xl group-hover:scale-110 transition-transform duration-300">
+                    <div className="bg-gradient-to-br from-gray-50 to-white p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
                       📦
                     </div>
                   )}
-                  <div className="p-6">
-                    <h3 className="font-bold text-gray-900 mb-3 text-lg line-clamp-2">{product.name}</h3>
-                    <div className="flex items-center justify-between mb-4">
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
+                    <div className="flex items-center justify-between mb-3">
                       <div>
-                        <span className="text-2xl font-extrabold text-gray-800">
+                        <span className="text-xl font-extrabold text-gray-800">
                           {Number(product.price || 0).toFixed(2)} frw
                         </span>
                       </div>
                     </div>
                     <button
                       onClick={addToCart}
-                      className="w-full bg-orange-500 text-white py-3 px-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
                     >
-                      <ShoppingCart size={20} />
+                      <ShoppingCart size={18} />
                       Add to Cart
                     </button>
                   </div>
@@ -407,27 +407,27 @@ export default function EcommerceHomepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">💎jirani picks</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">💎jirani picks</h2>
             </div>
             <Link 
               href="/products"
-              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-lg hover:text-gray-800 transition group"
+              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-base hover:text-gray-800 transition group"
             >
               View All Products
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
             </Link>
           </div>
           {loading ? (
             <div className="text-center py-12 text-gray-500">Loading products...</div>
           ) : jiraniPicks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {jiraniPicks.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 relative group"
+                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 relative group"
                 >
                   {product.image_url && product.image_url.trim() !== '' ? (
-                    <div className="bg-gray-50 p-0 overflow-hidden relative h-64">
+                    <div className="bg-gray-50 p-0 overflow-hidden relative h-48">
                       <img 
                         src={product.image_url} 
                         alt={product.name}
@@ -437,28 +437,28 @@ export default function EcommerceHomepage() {
                           e.currentTarget.style.display = 'none';
                           const fallback = e.currentTarget.parentElement;
                           if (fallback) {
-                            fallback.innerHTML = '<div class="bg-gray-50 p-12 flex items-center justify-center text-7xl w-full h-full">📦</div>';
+                            fallback.innerHTML = '<div class="bg-gray-50 p-8 flex items-center justify-center text-5xl w-full h-full">📦</div>';
                           }
                         }}
                       />
                     </div>
                   ) : (
-                    <div className="bg-gray-50 p-12 flex items-center justify-center text-7xl group-hover:scale-110 transition-transform duration-300">
+                    <div className="bg-gray-50 p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
                       📦
                     </div>
                   )}
-                  <div className="p-6">
-                    <h3 className="font-bold text-gray-900 mb-3 text-lg line-clamp-2">{product.name}</h3>
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-2xl font-extrabold text-gray-800">
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-xl font-extrabold text-gray-800">
                         {Number(product.price || 0).toFixed(2)} frw
                       </span>
                     </div>
                     <button
                       onClick={addToCart}
-                      className="w-full bg-orange-500 text-white py-3 px-4 rounded-xl font-bold hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
                     >
-                      <ShoppingCart size={20} />
+                      <ShoppingCart size={18} />
                       Add to Cart
                     </button>
                   </div>
@@ -477,38 +477,38 @@ export default function EcommerceHomepage() {
           <div className="grid md:grid-cols-2 gap-12 items-start">
             {/* Newsletter */}
             <div className="text-center md:text-left">
-              <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-gray-900 tracking-tight">Subscribe to Our Newsletter</h2>
-              <p className="text-base text-gray-800 mb-6 font-medium">
+              <h2 className="text-xl md:text-2xl font-extrabold mb-3 text-gray-900 tracking-tight">Subscribe to Our Newsletter</h2>
+              <p className="text-sm text-gray-800 mb-6 font-medium">
                 Get the latest deals, exclusive offers, and new product announcements directly in your inbox.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="flex-1 px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base font-medium bg-white border border-gray-200"
+                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm font-medium bg-white border border-gray-200"
                 />
-                <button className="bg-orange-500 text-white px-6 py-4 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-2 whitespace-nowrap">
+                <button className="bg-orange-500 text-white px-5 py-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 shadow-xl flex items-center justify-center gap-2 whitespace-nowrap">
                   Subscribe
-                  <ArrowRight size={20} />
+                  <ArrowRight size={18} />
                 </button>
               </div>
-              <p className="text-sm text-gray-600 mt-3">We respect your privacy. Unsubscribe at any time.</p>
+              <p className="text-xs text-gray-600 mt-3">We respect your privacy. Unsubscribe at any time.</p>
             </div>
 
             {/* Shopping Guide */}
             <div className="text-center md:text-left">
-              <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-gray-900 tracking-tight">Shopping Guide</h2>
-              <ul className="space-y-3 text-base text-gray-800 font-medium">
+              <h2 className="text-xl md:text-2xl font-extrabold mb-3 text-gray-900 tracking-tight">Shopping Guide</h2>
+              <ul className="space-y-2 text-sm text-gray-800 font-medium">
                 <li className="flex items-center gap-2">
-                  <ArrowRight size={18} className="text-gray-600" />
+                  <ArrowRight size={16} className="text-gray-600" />
                   How To Register
                 </li>
                 <li className="flex items-center gap-2">
-                  <ArrowRight size={18} className="text-gray-600" />
+                  <ArrowRight size={16} className="text-gray-600" />
                   How To Place An Order
                 </li>
                 <li className="flex items-center gap-2">
-                  <ArrowRight size={18} className="text-gray-600" />
+                  <ArrowRight size={16} className="text-gray-600" />
                   How To Pay
                 </li>
               </ul>
@@ -522,28 +522,28 @@ export default function EcommerceHomepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-gray-900 text-xl font-bold mb-4">Jirani</h3>
-              <p className="text-sm text-gray-700">Your trusted local marketplace for quality products across Rwanda.</p>
+              <h3 className="text-gray-900 text-lg font-bold mb-4">Jirani</h3>
+              <p className="text-xs text-gray-700">Your trusted local marketplace for quality products across Rwanda.</p>
             </div>
             <div>
-              <h4 className="text-gray-900 font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm">
+              <h4 className="text-gray-900 font-semibold mb-4 text-base">Quick Links</h4>
+              <ul className="space-y-2 text-xs">
                 <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">About Us</a></li>
                 <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Contact</a></li>
                 <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">FAQs</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-gray-900 font-semibold mb-4">Customer Service</h4>
-              <ul className="space-y-2 text-sm">
+              <h4 className="text-gray-900 font-semibold mb-4 text-base">Customer Service</h4>
+              <ul className="space-y-2 text-xs">
                 <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Delivery Info</a></li>
                 <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Returns</a></li>
                 <li><a href="#" className="text-gray-700 hover:text-gray-900 transition">Track Order</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-gray-900 font-semibold mb-4">Follow Us</h4>
-              <p className="text-sm mb-4 text-gray-700">Stay connected on social media</p>
+              <h4 className="text-gray-900 font-semibold mb-4 text-base">Follow Us</h4>
+              <p className="text-xs mb-4 text-gray-700">Stay connected on social media</p>
               <div className="flex space-x-4">
                 <button className="text-2xl hover:opacity-70 transition">📘</button>
                 <button className="text-2xl hover:opacity-70 transition">📷</button>
@@ -551,7 +551,7 @@ export default function EcommerceHomepage() {
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-400 mt-8 pt-8 text-center text-sm text-gray-700">
+          <div className="border-t border-gray-400 mt-8 pt-8 text-center text-xs text-gray-700">
             <p>© 2025 Jirani. All rights reserved. Serving customers across Rwanda.</p>
           </div>
         </div>

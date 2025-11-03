@@ -18,6 +18,8 @@ export default function EcommerceHomepage() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
+  const [categoryImages, setCategoryImages] = useState<Record<number, string>>({});
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,13 +62,34 @@ export default function EcommerceHomepage() {
         const picks = (products || []).filter(p => p.is_jirani_recommended === 1 && p.active === 1);
         setJiraniPicks(picks);
         
+        // Load first product image for each category from already loaded products
+        const imagesMap: Record<number, string> = {};
+        if (categoriesData && categoriesData.length > 0 && products && products.length > 0) {
+          for (const category of categoriesData) {
+            // Find first active product with an image in this category
+            const productWithImage = products.find(
+              p => p.category_id === category.id && 
+                   p.active === 1 && 
+                   p.image_url && 
+                   p.image_url.trim() !== ''
+            );
+            
+            if (productWithImage?.image_url) {
+              imagesMap[category.id] = productWithImage.image_url;
+            }
+          }
+        }
+        
+        setCategoryImages(imagesMap);
+        
         // Debug: Log products with images
         console.log('Products loaded:', {
           total: products?.length || 0,
           newArrivals: arrivals.length,
           jiraniPicks: picks.length,
           withImages: (products || []).filter(p => p.image_url).length,
-          sampleProduct: products?.[0]
+          sampleProduct: products?.[0],
+          categoryImages: Object.keys(imagesMap).length
         });
       } catch (error) {
         console.error('Failed to load data:', error);
@@ -272,13 +295,28 @@ export default function EcommerceHomepage() {
             ) : categories.length > 0 ? (
               categories.map((category) => {
                 const display = getCategoryDisplay(category.id, category.name);
+                const categoryImage = categoryImages[category.id];
                 return (
                   <Link
                     key={category.id}
                     href={`/products?category=${category.id}`}
-                    className={`${display.color} p-6 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 hover:-translate-y-1 text-center group cursor-pointer`}
+                    className={`${display.color} p-6 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 hover:-translate-y-1 text-center group cursor-pointer overflow-hidden`}
                   >
-                    <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">{display.icon}</div>
+                    <div className="mb-3 group-hover:scale-110 transition-transform flex items-center justify-center h-20">
+                      {categoryImage && !failedImages.has(category.id) ? (
+                        <img 
+                          src={categoryImage} 
+                          alt={category.name}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={() => {
+                            // Mark this image as failed and show icon fallback
+                            setFailedImages(prev => new Set(prev).add(category.id));
+                          }}
+                        />
+                      ) : (
+                        <div className="text-5xl">{display.icon}</div>
+                      )}
+                    </div>
                     <p className="font-bold text-gray-800 text-sm md:text-base">{category.name}</p>
                   </Link>
                 );

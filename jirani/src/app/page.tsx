@@ -342,40 +342,6 @@ export default function EcommerceHomepage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-gray-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="bg-indigo-100 p-3 rounded-lg">
-                <Truck className="text-indigo-600" size={24} />
-              </div>
-              <div>
-                <p className="font-bold text-base text-gray-900 mb-1">Kigali Delivery</p>
-                <p className="text-xs text-gray-600">Fast delivery in 1-2 working days</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Clock className="text-purple-600" size={24} />
-              </div>
-              <div>
-                <p className="font-bold text-base text-gray-900 mb-1">Other Districts</p>
-                <p className="text-xs text-gray-600">Nationwide delivery in 2-4 working days</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="bg-pink-100 p-3 rounded-lg">
-                <Shield className="text-pink-600" size={24} />
-              </div>
-              <div>
-                <p className="font-bold text-base text-gray-900 mb-1">Self Pick-Up</p>
-                <p className="text-xs text-gray-600">Available anytime at our store</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Categories */}
       <section className="pt-0 pb-16 bg-gray-50">

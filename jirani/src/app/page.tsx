@@ -115,7 +115,7 @@ export default function EcommerceHomepage() {
     const iconIndex = categoryId % icons.length;
     
     // Dynamic color selection based on category ID
-    const colors = ['bg-blue-100', 'bg-pink-100', 'bg-green-100', 'bg-purple-100', 'bg-orange-100', 'bg-yellow-100', 'bg-indigo-100', 'bg-red-100'];
+    const colors = ['bg-blue-100', 'bg-pink-100', 'bg-green-100', 'bg-purple-100', 'bg-orange-100', 'bg-orange-200', 'bg-indigo-100', 'bg-red-100'];
     const colorIndex = categoryId % colors.length;
     
     return { 

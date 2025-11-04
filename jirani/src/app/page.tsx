@@ -362,7 +362,7 @@ export default function EcommerceHomepage() {
       {/* Categories */}
       <section className="pt-0 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 pt-8">
+          <div className="text-left mb-12 pt-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Shop by Category</h2>
             <p className="text-base text-gray-600">Browse our wide selection of products</p>
           </div>

@@ -248,7 +248,7 @@ export default function EcommerceHomepage() {
 
               {/* Delivery Location Selector */}
               <div className="mb-6">
-                <label className="block text-xs font-semibold text-gray-700 mb-2">Delivery Location</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-2">Set Delivery District</label>
                 <div className="relative">
                   <select className="w-full px-4 py-3 pl-10 pr-4 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer">
                     <option value="">Select District</option>

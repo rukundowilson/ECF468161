@@ -207,6 +207,8 @@ export default function EcommerceHomepage() {
                 quality={90}
               />
             </div>
+            {/* Dark Overlay for text visibility */}
+            <div className="absolute inset-0 bg-black/50"></div>
             
             <div className="relative z-10 py-20 md:py-32 px-4 sm:px-6">
               <div className="text-center md:text-left relative">

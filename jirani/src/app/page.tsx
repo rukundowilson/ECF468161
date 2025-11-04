@@ -235,7 +235,7 @@ export default function EcommerceHomepage() {
             </div>
 
             {/* Sidebar with Login/Register and Features */}
-            <div className="md:col-span-1 bg-white rounded-2xl p-6 shadow-lg">
+            <div className="md:col-span-1 bg-white p-6">
               {/* Login/Register Buttons */}
               <div className="flex gap-2 mb-8">
                 <button className="flex-1 bg-orange-500 text-white px-4 py-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all">

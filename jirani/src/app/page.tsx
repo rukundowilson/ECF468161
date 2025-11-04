@@ -243,22 +243,6 @@ export default function EcommerceHomepage() {
                   </div>
                 </div>
               </div>
-
-              <h3 className="text-sm font-bold text-gray-900 mb-4">Delivery Summary</h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-bold text-xs text-gray-900 mb-1">Kigali Delivery</h4>
-                  <p className="text-xs text-gray-600">Fast delivery in 1-2 working days</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-xs text-gray-900 mb-1">Other Districts</h4>
-                  <p className="text-xs text-gray-600">Nationwide delivery in 2-4 working days</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-xs text-gray-900 mb-1">Self Pick-Up</h4>
-                  <p className="text-xs text-gray-600">Available anytime at our store</p>
-                </div>
-              </div>
             </div>
 
             {/* Hero Content */}

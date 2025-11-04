@@ -193,7 +193,7 @@ export default function EcommerceHomepage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-0 pb-20 md:pb-32">
+      <section className="relative overflow-hidden pt-0 pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Background Image */}
           <div className="absolute inset-0 rounded-2xl overflow-hidden">
@@ -207,7 +207,7 @@ export default function EcommerceHomepage() {
             />
           </div>
           
-          <div className="relative z-10 py-20 md:py-32">
+          <div className="relative z-10 py-20 md:py-32 pb-0">
             <div className="text-center md:text-left relative">
               <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">

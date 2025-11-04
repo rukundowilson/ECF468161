@@ -294,7 +294,7 @@ export default function EcommerceHomepage() {
       </section>
 
       {/* Features */}
-      <section className="bg-gradient-to-r from-gray-50 to-white py-12 border-b border-gray-200">
+      <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-start space-x-4 bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
@@ -329,7 +329,7 @@ export default function EcommerceHomepage() {
       </section>
 
       {/* Categories */}
-      <section className="pt-0 pb-16 bg-white">
+      <section className="pt-0 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 pt-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Shop by Category</h2>
@@ -377,7 +377,7 @@ export default function EcommerceHomepage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
             <div>
@@ -450,7 +450,7 @@ export default function EcommerceHomepage() {
       </section>
 
       {/* Trending Deals */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
             <div>
@@ -522,7 +522,7 @@ export default function EcommerceHomepage() {
       </section>
 
       {/* Newsletter & Shopping Guide */}
-      <section className="border-t border-gray-300 py-10">
+      <section className="bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-start">
             {/* Newsletter */}

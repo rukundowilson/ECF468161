@@ -193,50 +193,52 @@ export default function EcommerceHomepage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0">
-          <Image
-            src="/kgl_fashion.png"
-            alt="Fashion Collection - Kigali"
-            fill
-            className="object-cover"
-            priority
-            quality={90}
-          />
-          <div className="absolute inset-0 bg-gray-900/60"></div>
-          <div className="absolute inset-0 bg-black/20"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative z-10">
-          <div className="text-center md:text-left relative">
-            <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
-              Shop in Kigali & Across Rwanda
-            </h2>
-            <p className="text-lg md:text-xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
-              Discover amazing products from local vendors across <span className="font-bold text-orange-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link 
-                href="/products"
-                className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
-              >
-                Shop Now
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-              </Link>
-              <select
-                value={selectedCategory}
-                onChange={(e) => handleCategorySelect(e.target.value ? Number(e.target.value) : '')}
-                className="bg-gray-600/80 backdrop-blur-md text-white border-2 border-gray-400/60 px-6 py-3 rounded-xl font-semibold text-base hover:bg-gray-500/80 transition-all shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300"
-              >
-                <option value="">Browse Categories</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id} className="bg-gray-700 text-white">
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 rounded-2xl overflow-hidden">
+            <Image
+              src="/kgl_fashion.png"
+              alt="Fashion Collection - Kigali"
+              fill
+              className="object-cover"
+              priority
+              quality={90}
+            />
+            <div className="absolute inset-0 bg-gray-900/60"></div>
+            <div className="absolute inset-0 bg-black/20"></div>
+          </div>
+          
+          <div className="relative z-10 py-20 md:py-32">
+            <div className="text-center md:text-left relative">
+              <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
+                Shop in Kigali & Across Rwanda
+              </h2>
+              <p className="text-lg md:text-xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
+                Discover amazing products from local vendors across <span className="font-bold text-orange-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <Link 
+                  href="/products"
+                  className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
+                >
+                  Shop Now
+                  <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
+                </Link>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => handleCategorySelect(e.target.value ? Number(e.target.value) : '')}
+                  className="bg-gray-600/80 backdrop-blur-md text-white border-2 border-gray-400/60 px-6 py-3 rounded-xl font-semibold text-base hover:bg-gray-500/80 transition-all shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  <option value="">Browse Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id} className="bg-gray-700 text-white">
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>

@@ -131,9 +131,10 @@ export default function EcommerceHomepage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className={`bg-white shadow-sm sticky top-0 z-50 transition-transform duration-300 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
+      <header className={`sticky top-0 z-50 transition-transform duration-300 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="bg-white shadow-sm rounded-b-2xl">
+            <div className="flex items-center justify-between h-16 px-4 sm:px-6">
             {/* Logo */}
             <Link href="/" className="flex items-center group">
               <h1 className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
@@ -179,7 +180,7 @@ export default function EcommerceHomepage() {
           </div>
 
           {/* Mobile Search */}
-          <div className="md:hidden pb-4">
+          <div className="md:hidden pb-4 px-4 sm:px-6">
             <div className="relative">
               <input
                 type="text"
@@ -188,6 +189,7 @@ export default function EcommerceHomepage() {
               />
               <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
             </div>
+          </div>
           </div>
         </div>
       </header>

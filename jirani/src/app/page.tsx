@@ -198,6 +198,52 @@ export default function EcommerceHomepage() {
           <div className="grid md:grid-cols-5 gap-6">
             {/* Left Sidebar - Delivery Summary */}
             <div className="md:col-span-1 bg-white p-6">
+              {/* Delivery Location Selector */}
+              <div className="mb-6">
+                <label className="block text-xs font-semibold text-gray-700 mb-2">Set Delivery District</label>
+                <div className="relative">
+                  <select className="w-full px-4 py-3 pl-10 pr-4 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer">
+                    <option value="">Select District</option>
+                    <option value="kigali">Kigali City</option>
+                    <option value="gasabo">Gasabo</option>
+                    <option value="nyarugenge">Nyarugenge</option>
+                    <option value="kicukiro">Kicukiro</option>
+                    <option value="musanze">Musanze</option>
+                    <option value="rubavu">Rubavu</option>
+                    <option value="burera">Burera</option>
+                    <option value="gakenke">Gakenke</option>
+                    <option value="ruhango">Ruhango</option>
+                    <option value="nyamagabe">Nyamagabe</option>
+                    <option value="nyanza">Nyanza</option>
+                    <option value="gisagara">Gisagara</option>
+                    <option value="huye">Huye</option>
+                    <option value="nyaruguru">Nyaruguru</option>
+                    <option value="muhanga">Muhanga</option>
+                    <option value="kamonyi">Kamonyi</option>
+                    <option value="karongi">Karongi</option>
+                    <option value="rutsiro">Rutsiro</option>
+                    <option value="rubavu">Rubavu</option>
+                    <option value="nyabihu">Nyabihu</option>
+                    <option value="rusizi">Rusizi</option>
+                    <option value="nyamasheke">Nyamasheke</option>
+                    <option value="nyagatare">Nyagatare</option>
+                    <option value="gatsibo">Gatsibo</option>
+                    <option value="kayonza">Kayonza</option>
+                    <option value="kirehe">Kirehe</option>
+                    <option value="ngoma">Ngoma</option>
+                    <option value="bugesera">Bugesera</option>
+                  </select>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <span className="text-lg">🇷🇼</span>
+                  </div>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
               <h3 className="text-sm font-bold text-gray-900 mb-4">Delivery Summary</h3>
               <div className="space-y-4">
                 <div>
@@ -263,52 +309,6 @@ export default function EcommerceHomepage() {
                 <button className="flex-1 bg-white text-gray-700 border-2 border-gray-300 px-4 py-3 rounded-lg font-bold text-sm hover:bg-gray-50 transition-all">
                   Register
                 </button>
-              </div>
-
-              {/* Delivery Location Selector */}
-              <div className="mb-6">
-                <label className="block text-xs font-semibold text-gray-700 mb-2">Set Delivery District</label>
-                <div className="relative">
-                  <select className="w-full px-4 py-3 pl-10 pr-4 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer">
-                    <option value="">Select District</option>
-                    <option value="kigali">Kigali City</option>
-                    <option value="gasabo">Gasabo</option>
-                    <option value="nyarugenge">Nyarugenge</option>
-                    <option value="kicukiro">Kicukiro</option>
-                    <option value="musanze">Musanze</option>
-                    <option value="rubavu">Rubavu</option>
-                    <option value="burera">Burera</option>
-                    <option value="gakenke">Gakenke</option>
-                    <option value="ruhango">Ruhango</option>
-                    <option value="nyamagabe">Nyamagabe</option>
-                    <option value="nyanza">Nyanza</option>
-                    <option value="gisagara">Gisagara</option>
-                    <option value="huye">Huye</option>
-                    <option value="nyaruguru">Nyaruguru</option>
-                    <option value="muhanga">Muhanga</option>
-                    <option value="kamonyi">Kamonyi</option>
-                    <option value="karongi">Karongi</option>
-                    <option value="rutsiro">Rutsiro</option>
-                    <option value="rubavu">Rubavu</option>
-                    <option value="nyabihu">Nyabihu</option>
-                    <option value="rusizi">Rusizi</option>
-                    <option value="nyamasheke">Nyamasheke</option>
-                    <option value="nyagatare">Nyagatare</option>
-                    <option value="gatsibo">Gatsibo</option>
-                    <option value="kayonza">Kayonza</option>
-                    <option value="kirehe">Kirehe</option>
-                    <option value="ngoma">Ngoma</option>
-                    <option value="bugesera">Bugesera</option>
-                  </select>
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <span className="text-lg">🇷🇼</span>
-                  </div>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
               </div>
 
               {/* Features List */}

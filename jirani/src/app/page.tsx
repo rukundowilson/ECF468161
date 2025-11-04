@@ -134,62 +134,62 @@ export default function EcommerceHomepage() {
       <header className={`sticky top-0 z-50 transition-transform duration-300 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow-sm rounded-b-2xl">
-            <div className="flex items-center justify-between h-16 px-4 sm:px-6">
-            {/* Logo */}
-            <Link href="/" className="flex items-center group">
-              <h1 className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
-                Jirani
-              </h1>
-            </Link>
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
+              <Link href="/" className="flex items-center group">
+                <h1 className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
+                  Jirani
+                </h1>
+              </Link>
 
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-              <div className="w-full relative">
+              {/* Search Bar - Desktop */}
+              <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+                <div className="w-full relative">
+                  <input
+                    type="text"
+                    placeholder="Search for products, brands, categories..."
+                    className="w-full px-5 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                  />
+                  <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                </div>
+              </div>
+
+              {/* Right Icons */}
+              <div className="flex items-center space-x-4 md:space-x-6">
+                <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                  <User size={22} />
+                  <span className="text-sm">Account</span>
+                </button>
+                <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                  <Heart size={22} />
+                  <span className="text-sm">Wishlist</span>
+                </button>
+                <button className="relative flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                  <ShoppingCart size={22} />
+                  <span className="hidden md:inline text-sm">Cart</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+                <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition" onClick={() => setMenuOpen(!menuOpen)}>
+                  {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Search */}
+            <div className="md:hidden pb-4">
+              <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search for products, brands, categories..."
-                  className="w-full px-5 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                  placeholder="Search products, brands..."
+                  className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                 />
                 <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
               </div>
             </div>
-
-            {/* Right Icons */}
-            <div className="flex items-center space-x-4 md:space-x-6">
-              <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
-                <User size={22} />
-                <span className="text-sm">Account</span>
-              </button>
-              <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
-                <Heart size={22} />
-                <span className="text-sm">Wishlist</span>
-              </button>
-              <button className="relative flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
-                <ShoppingCart size={22} />
-                <span className="hidden md:inline text-sm">Cart</span>
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-              <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition" onClick={() => setMenuOpen(!menuOpen)}>
-                {menuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Search */}
-          <div className="md:hidden pb-4 px-4 sm:px-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search products, brands..."
-                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
-              />
-              <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
-            </div>
-          </div>
           </div>
         </div>
       </header>

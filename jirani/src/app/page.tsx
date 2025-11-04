@@ -193,9 +193,9 @@ export default function EcommerceHomepage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20 md:py-32">
+      <section className="relative overflow-hidden pt-0 pb-20 md:pb-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          {/* Background Image with Overlay */}
+          {/* Background Image */}
           <div className="absolute inset-0 rounded-2xl overflow-hidden">
             <Image
               src="/kgl_fashion.png"
@@ -205,8 +205,6 @@ export default function EcommerceHomepage() {
               priority
               quality={90}
             />
-            <div className="absolute inset-0 bg-gray-900/60"></div>
-            <div className="absolute inset-0 bg-black/20"></div>
           </div>
           
           <div className="relative z-10 py-20 md:py-32">

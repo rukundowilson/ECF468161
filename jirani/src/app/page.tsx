@@ -340,10 +340,10 @@ export default function EcommerceHomepage() {
               {newArrivals.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-100 group"
+                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-100 group aspect-square flex flex-col"
                 >
                   {product.image_url && product.image_url.trim() !== '' ? (
-                    <div className="bg-gray-50 p-0 overflow-hidden relative h-48">
+                    <div className="bg-gray-50 p-0 overflow-hidden relative flex-1">
                       <img 
                         src={product.image_url} 
                         alt={product.name}
@@ -359,22 +359,23 @@ export default function EcommerceHomepage() {
                       />
                     </div>
                   ) : (
-                    <div className="bg-gradient-to-br from-gray-50 to-white p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
+                    <div className="bg-gradient-to-br from-gray-50 to-white p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300 flex-1">
                       📦
                     </div>
                   )}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <span className="text-xl font-extrabold text-gray-800">
-                          {Number(product.price || 0).toFixed(2)} frw
-                        </span>
-                      </div>
+                  <div className="p-4 flex flex-col flex-shrink-0">
+                    <div className="mb-2">
+                      <span className="text-xl font-extrabold text-red-600">
+                        {Number(product.price || 0).toFixed(2)} frw
+                      </span>
                     </div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
+                    {product.description && (
+                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                    )}
                     <button
                       onClick={addToCart}
-                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 mt-auto"
                     >
                       <ShoppingCart size={18} />
                       Add to Cart
@@ -411,10 +412,10 @@ export default function EcommerceHomepage() {
               {jiraniPicks.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 relative group"
+                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 relative group aspect-square flex flex-col"
                 >
                   {product.image_url && product.image_url.trim() !== '' ? (
-                    <div className="bg-gray-50 p-0 overflow-hidden relative h-48">
+                    <div className="bg-gray-50 p-0 overflow-hidden relative flex-1">
                       <img 
                         src={product.image_url} 
                         alt={product.name}
@@ -430,20 +431,23 @@ export default function EcommerceHomepage() {
                       />
                     </div>
                   ) : (
-                    <div className="bg-gray-50 p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
+                    <div className="bg-gray-50 p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300 flex-1">
                       📦
                     </div>
                   )}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-xl font-extrabold text-gray-800">
+                  <div className="p-4 flex flex-col flex-shrink-0">
+                    <div className="mb-2">
+                      <span className="text-xl font-extrabold text-red-600">
                         {Number(product.price || 0).toFixed(2)} frw
                       </span>
                     </div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
+                    {product.description && (
+                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                    )}
                     <button
                       onClick={addToCart}
-                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 mt-auto"
                     >
                       <ShoppingCart size={18} />
                       Add to Cart

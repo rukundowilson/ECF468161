@@ -195,9 +195,28 @@ export default function EcommerceHomepage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-0 pb-0 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-5 gap-6">
+            {/* Left Sidebar - Delivery Summary */}
+            <div className="md:col-span-1 bg-white p-6">
+              <h3 className="text-sm font-bold text-gray-900 mb-4">Delivery Summary</h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-bold text-xs text-gray-900 mb-1">Kigali Delivery</h4>
+                  <p className="text-xs text-gray-600">Fast delivery in 1-2 working days</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-gray-900 mb-1">Other Districts</h4>
+                  <p className="text-xs text-gray-600">Nationwide delivery in 2-4 working days</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-gray-900 mb-1">Self Pick-Up</h4>
+                  <p className="text-xs text-gray-600">Available anytime at our store</p>
+                </div>
+              </div>
+            </div>
+
             {/* Hero Content */}
-            <div className="md:col-span-2 relative rounded-2xl overflow-hidden">
+            <div className="md:col-span-3 relative rounded-2xl overflow-hidden">
               {/* Background Image */}
               <div className="absolute inset-0">
                 <Image

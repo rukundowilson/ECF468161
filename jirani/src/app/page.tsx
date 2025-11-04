@@ -211,7 +211,7 @@ export default function EcommerceHomepage() {
             <div className="absolute inset-0 bg-black/50"></div>
             
             <div className="relative z-10 py-20 md:py-32 px-4 sm:px-6">
-              <div className="text-center md:text-left relative">
+              <div className="text-center md:text-left relative max-w-2xl">
                 <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
                 <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
                   Shop in Kigali & Across Rwanda
@@ -227,18 +227,6 @@ export default function EcommerceHomepage() {
                     Shop Now
                     <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
                   </Link>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => handleCategorySelect(e.target.value ? Number(e.target.value) : '')}
-                    className="bg-gray-600/80 backdrop-blur-md text-white border-2 border-gray-400/60 px-6 py-3 rounded-xl font-semibold text-base hover:bg-gray-500/80 transition-all shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300"
-                  >
-                    <option value="">Browse Categories</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id} className="bg-gray-700 text-white">
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
             </div>

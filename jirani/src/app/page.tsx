@@ -194,20 +194,6 @@ export default function EcommerceHomepage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0">
-          <Image
-            src="/kgl_fashion.png"
-            alt="Fashion Collection - Kigali"
-            fill
-            className="object-cover"
-            priority
-            quality={90}
-          />
-          <div className="absolute inset-0 bg-gray-900/60"></div>
-          <div className="absolute inset-0 bg-black/20"></div>
-        </div>
-        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="text-center md:text-left relative">
@@ -240,8 +226,19 @@ export default function EcommerceHomepage() {
                 </select>
               </div>
             </div>
-            <div className="hidden md:flex justify-center items-center">
-              <div className="text-9xl animate-pulse opacity-50 drop-shadow-2xl">🛍️</div>
+            <div className="hidden md:flex justify-center items-center relative">
+              <div className="relative w-full h-96 rounded-2xl overflow-hidden">
+                <Image
+                  src="/kgl_fashion.png"
+                  alt="Fashion Collection - Kigali"
+                  fill
+                  className="object-cover"
+                  priority
+                  quality={90}
+                />
+                <div className="absolute inset-0 bg-gray-900/40"></div>
+                <div className="absolute inset-0 bg-black/10"></div>
+              </div>
             </div>
           </div>
         </div>

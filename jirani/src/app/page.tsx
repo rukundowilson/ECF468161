@@ -193,7 +193,7 @@ export default function EcommerceHomepage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-0 pb-0">
+      <section className="relative overflow-hidden pt-0 pb-0 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-6">
             {/* Hero Content */}

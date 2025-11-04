@@ -263,8 +263,8 @@ export default function EcommerceHomepage() {
                     <Globe className="text-blue-600" size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">Worldwide Delivery</h3>
-                    <p className="text-xs text-gray-600">Supported more than 10 countries.</p>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">Rwanda Delivery</h3>
+                    <p className="text-xs text-gray-600">Nationwide delivery across all districts.</p>
                   </div>
                 </div>
 

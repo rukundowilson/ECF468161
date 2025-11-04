@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Search, Menu, X, Heart, User, Star, Clock, Package, ArrowRight, Shield, Truck } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, Heart, User, Star, Clock, Package, ArrowRight, Shield, Truck, Globe, CreditCard, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ProductService } from './services/productService';
@@ -195,38 +195,97 @@ export default function EcommerceHomepage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-0 pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-2xl overflow-hidden">
-            {/* Background Image */}
-            <div className="absolute inset-0">
-              <Image
-                src="/kgl_fashion.png"
-                alt="Fashion Collection - Kigali"
-                fill
-                className="object-cover"
-                priority
-                quality={90}
-              />
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Hero Content */}
+            <div className="md:col-span-2 relative rounded-2xl overflow-hidden">
+              {/* Background Image */}
+              <div className="absolute inset-0">
+                <Image
+                  src="/kgl_fashion.png"
+                  alt="Fashion Collection - Kigali"
+                  fill
+                  className="object-cover"
+                  priority
+                  quality={90}
+                />
+              </div>
+              {/* Dark Overlay for text visibility */}
+              <div className="absolute inset-0 bg-black/50"></div>
+              
+              <div className="relative z-10 py-20 md:py-32 px-4 sm:px-6">
+                <div className="text-center md:text-left relative max-w-2xl">
+                  <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
+                    Shop in Kigali & Across Rwanda
+                  </h2>
+                  <p className="text-lg md:text-xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
+                    Discover amazing products from local vendors across <span className="font-bold text-orange-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <Link 
+                      href="/products"
+                      className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
+                    >
+                      Shop Now
+                      <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
-            {/* Dark Overlay for text visibility */}
-            <div className="absolute inset-0 bg-black/50"></div>
-            
-            <div className="relative z-10 py-20 md:py-32 px-4 sm:px-6">
-              <div className="text-center md:text-left relative max-w-2xl">
-                <div className="absolute -top-8 -right-8 md:-right-16 text-8xl md:text-9xl animate-pulse opacity-40 drop-shadow-2xl hidden lg:block pointer-events-none">🛍️</div>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white drop-shadow-2xl">
-                  Shop in Kigali & Across Rwanda
-                </h2>
-                <p className="text-lg md:text-xl mb-10 text-white/90 leading-relaxed drop-shadow-lg">
-                  Discover amazing products from local vendors across <span className="font-bold text-orange-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                  <Link 
-                    href="/products"
-                    className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
-                  >
-                    Shop Now
-                    <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-                  </Link>
+
+            {/* Sidebar with Login/Register and Features */}
+            <div className="md:col-span-1 bg-white rounded-2xl p-6 shadow-lg">
+              {/* Login/Register Buttons */}
+              <div className="flex gap-2 mb-8">
+                <button className="flex-1 bg-orange-500 text-white px-4 py-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all">
+                  Login
+                </button>
+                <button className="flex-1 bg-white text-gray-700 border-2 border-gray-300 px-4 py-3 rounded-lg font-bold text-sm hover:bg-gray-50 transition-all">
+                  Register
+                </button>
+              </div>
+
+              {/* Features List */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                    <Truck className="text-blue-600" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">Great Value</h3>
+                    <p className="text-xs text-gray-600">Continuous promotions.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                    <Globe className="text-blue-600" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">Worldwide Delivery</h3>
+                    <p className="text-xs text-gray-600">Supported more than 10 countries.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                    <CreditCard className="text-blue-600" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">Safe Payment</h3>
+                    <p className="text-xs text-gray-600">Popular and secure payment methods.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                    <ShieldCheck className="text-blue-600" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">Shop with Confidence</h3>
+                    <p className="text-xs text-gray-600">Protect your purchase and delivery.</p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -7,6 +7,7 @@ import { ProductService } from './services/productService';
 import { Product } from './types/product';
 import { CategoryService } from './services/categoryService';
 import { Category } from './types/category';
+import ProductCard from '../components/ProductCard';
 
 export default function EcommerceHomepage() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,7 +105,7 @@ export default function EcommerceHomepage() {
   const handleCategorySelect = (categoryId: number | '') => {
     setSelectedCategory(categoryId);
     if (categoryId) {
-      window.location.href = `/products?category=${categoryId}`;
+      window.location.href = `/category/${categoryId}`;
     }
   };
 
@@ -155,10 +156,12 @@ export default function EcommerceHomepage() {
 
               {/* Right Icons */}
               <div className="flex items-center space-x-4 md:space-x-6">
-                <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
-                  <User size={22} />
-                  <span className="text-sm">Account</span>
-                </button>
+                <Link href="/dashboard" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span className="text-sm">Launch Outfit</span>
+                </Link>
                 <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium">
                   <Heart size={22} />
                   <span className="text-sm">Wishlist</span>
@@ -376,7 +379,7 @@ export default function EcommerceHomepage() {
                 return (
                   <Link
                     key={category.id}
-                    href={`/products?category=${category.id}`}
+                    href={`/category/${category.id}`}
                     className={`${display.color} p-6 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 hover:-translate-y-1 text-center group cursor-pointer overflow-hidden`}
                   >
                     <div className="mb-3 group-hover:scale-110 transition-transform flex items-center justify-center h-20">
@@ -427,52 +430,22 @@ export default function EcommerceHomepage() {
             <div className="text-center py-12 text-gray-500">Loading products...</div>
           ) : newArrivals.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {newArrivals.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-100 group aspect-square flex flex-col"
-                >
-                  {product.image_url && product.image_url.trim() !== '' ? (
-                    <div className="bg-gray-50 p-0 overflow-hidden relative flex-1">
-                      <img 
-                        src={product.image_url} 
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          // Fallback if image fails to load
-                          e.currentTarget.style.display = 'none';
-                          const fallback = e.currentTarget.parentElement;
-                          if (fallback) {
-                            fallback.innerHTML = '<div class="bg-gradient-to-br from-gray-50 to-white p-8 flex items-center justify-center text-5xl w-full h-full">📦</div>';
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="bg-gradient-to-br from-gray-50 to-white p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300 flex-1">
-                      📦
-                    </div>
-                  )}
-                  <div className="p-4 flex flex-col flex-shrink-0">
-                    <div className="mb-2">
-                      <span className="text-xl font-extrabold text-red-600">
-                        {Number(product.price || 0).toFixed(2)} frw
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
-                    {product.description && (
-                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                    )}
-                    <button
-                      onClick={addToCart}
-                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 mt-auto"
-                    >
-                      <ShoppingCart size={18} />
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              ))}
+              {newArrivals.map((product) => {
+                const hasDiscount = Math.random() > 0.7;
+                const discountPercent = hasDiscount ? Math.floor(Math.random() * 30) + 10 : 0;
+                const rating = (Math.random() * 1.5 + 3.5).toFixed(1);
+                const orders = Math.floor(Math.random() * 200) + 10;
+                
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    discountPercent={discountPercent}
+                    rating={rating}
+                    orders={orders}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 text-gray-500">No new arrivals at the moment. Check back soon!</div>
@@ -499,52 +472,22 @@ export default function EcommerceHomepage() {
             <div className="text-center py-12 text-gray-500">Loading products...</div>
           ) : jiraniPicks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {jiraniPicks.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white rounded-xl overflow-hidden hover:shadow-xl transition-all transform hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 relative group aspect-square flex flex-col"
-                >
-                  {product.image_url && product.image_url.trim() !== '' ? (
-                    <div className="bg-gray-50 p-0 overflow-hidden relative flex-1">
-                      <img 
-                        src={product.image_url} 
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          // Fallback if image fails to load
-                          e.currentTarget.style.display = 'none';
-                          const fallback = e.currentTarget.parentElement;
-                          if (fallback) {
-                            fallback.innerHTML = '<div class="bg-gray-50 p-8 flex items-center justify-center text-5xl w-full h-full">📦</div>';
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 p-8 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300 flex-1">
-                      📦
-                    </div>
-                  )}
-                  <div className="p-4 flex flex-col flex-shrink-0">
-                    <div className="mb-2">
-                      <span className="text-xl font-extrabold text-red-600">
-                        {Number(product.price || 0).toFixed(2)} frw
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-base line-clamp-2">{product.name}</h3>
-                    {product.description && (
-                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                    )}
-                    <button
-                      onClick={addToCart}
-                      className="w-full bg-orange-500 text-white py-2.5 px-3 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 mt-auto"
-                    >
-                      <ShoppingCart size={18} />
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              ))}
+              {jiraniPicks.map((product) => {
+                const hasDiscount = Math.random() > 0.7;
+                const discountPercent = hasDiscount ? Math.floor(Math.random() * 30) + 10 : 0;
+                const rating = (Math.random() * 1.5 + 3.5).toFixed(1);
+                const orders = Math.floor(Math.random() * 200) + 10;
+                
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    discountPercent={discountPercent}
+                    rating={rating}
+                    orders={orders}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 text-gray-500">No Jirani picks available at the moment. Check back soon!</div>

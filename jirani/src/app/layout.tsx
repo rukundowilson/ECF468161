@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ConditionalSidebar from "../components/ConditionalSidebar";
+import Navbar from "../components/Navbar";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Navbar />
         <div className="min-h-screen bg-gray-50 text-black flex">
           <ConditionalSidebar />
           <main className="flex-1 p-4 md:p-6 w-full md:ml-0 mt-12 md:mt-0">

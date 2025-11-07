@@ -23,17 +23,12 @@ export default function Navbar() {
   const isProductsListingPage = pathname === '/products';
   const isHomePage = pathname === '/';
   
-  // Hide navbar on admin routes (they have sidebar)
-  // Note: /products listing page shows BOTH navbar and sidebar
-  if (isAdminRoute) {
-    return null;
-  }
-
   // Hide on scroll behavior - enable on all pages
   const shouldHideOnScroll = true;
 
+  // All hooks must be called before any conditional returns
   useEffect(() => {
-    if (!shouldHideOnScroll) return;
+    if (!shouldHideOnScroll || isAdminRoute) return;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -52,7 +47,14 @@ export default function Navbar() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [shouldHideOnScroll]);
+  }, [shouldHideOnScroll, isAdminRoute]);
+
+  // Hide navbar on admin routes (they have sidebar)
+  // Note: /products listing page shows BOTH navbar and sidebar
+  // This check must come AFTER all hooks
+  if (isAdminRoute) {
+    return null;
+  }
 
   // Show search on all pages (consistent across all pages)
   const showSearch = true;

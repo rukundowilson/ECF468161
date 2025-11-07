@@ -118,6 +118,8 @@ export default function ProductsPage() {
   useEffect(() => {
     if (selectedProduct) {
       loadVariants(selectedProduct.id);
+    } else {
+      setVariants([]);
     }
   }, [selectedProduct]);
 
@@ -158,7 +160,8 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await ProductService.getProducts();
+      // Include products without variants for admin page so they can add variants
+      const data = await ProductService.getProducts({ includeWithoutVariants: true });
       console.log('Products data:', data);
       // Ensure we have a valid array and filter out any invalid products
       const validProducts = Array.isArray(data) ? data.filter(product => product && product.id) : [];
@@ -728,60 +731,72 @@ export default function ProductsPage() {
                         (p.brand || '').toLowerCase().includes(q)
                       );
                     })
-                    .map((product, index) => (
-                    <div
-                      key={product.id || index}
-                      className={`p-4 border rounded-lg cursor-pointer transition ${
-                        selectedProduct?.id === product.id
-                          ? 'border-blue-500 bg-blue-50 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                      }`}
-                      onClick={() => setSelectedProduct(product)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-start space-x-3">
-                          {product.image_url && (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="h-14 w-14 object-cover rounded cursor-pointer"
-                              onClick={() => { setImagePreviewUrl(product.image_url!); setShowImagePreview(true); }}
-                            />
-                          )}
-                          <div>
-                          <h3 className="font-medium text-black">{product.name || 'Unnamed Product'}</h3>
-                          <p className="text-sm text-black mt-1">{product.description || 'No description'}</p>
-                          <p className="text-xs text-gray-600 mt-1">
-                            SKU: {product.sku || 'N/A'} | Price: {Number(product.price || 0).toFixed(2)} frw
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            Category: {product.category_name || 'N/A'} | Brand: {product.brand || 'N/A'}
-                          </p>
+                    .map((product, index) => {
+                      // Check if this product has variants (only if it's selected)
+                      const hasVariants = selectedProduct?.id === product.id ? variants.length > 0 : undefined;
+                      
+                      return (
+                      <div
+                        key={product.id || index}
+                        className={`p-4 border rounded-lg cursor-pointer transition ${
+                          selectedProduct?.id === product.id
+                            ? 'border-blue-500 bg-blue-50 shadow-sm'
+                            : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                        } ${hasVariants === false ? 'border-yellow-300 bg-yellow-50' : ''}`}
+                        onClick={() => setSelectedProduct(product)}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start space-x-3 flex-1">
+                            {product.image_url && (
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="h-14 w-14 object-cover rounded cursor-pointer"
+                                onClick={() => { setImagePreviewUrl(product.image_url!); setShowImagePreview(true); }}
+                              />
+                            )}
+                            <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-black">{product.name || 'Unnamed Product'}</h3>
+                              {hasVariants === false && (
+                                <span className="px-2 py-0.5 text-xs font-medium bg-yellow-200 text-yellow-800 rounded">
+                                  No Variants
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-black mt-1">{product.description || 'No description'}</p>
+                            <p className="text-xs text-gray-600 mt-1">
+                              SKU: {product.sku || 'N/A'} | Price: {Number(product.price || 0).toFixed(2)} frw
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Category: {product.category_name || 'N/A'} | Brand: {product.brand || 'N/A'}
+                            </p>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (product.id) startEditProduct(product);
+                              }}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (product.id) handleDeleteProduct(product.id);
+                              }}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (product.id) startEditProduct(product);
-                            }}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (product.id) handleDeleteProduct(product.id);
-                            }}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Delete
-                          </button>
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                    })}
                 </div>
               )}
             </div>
@@ -1132,8 +1147,8 @@ export default function ProductsPage() {
 
         {/* Create/Edit Variant Modal */}
         {(showVariantForm || editingVariant) && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 overflow-y-auto p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md my-auto max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-semibold mb-4">
                 {editingVariant ? 'Edit Variant' : 'Create Variant'}
                 {selectedProduct && !editingVariant && ` for ${selectedProduct.name}`}
@@ -1174,6 +1189,42 @@ export default function ProductsPage() {
               )}
               <form onSubmit={editingVariant ? handleUpdateVariant : handleCreateVariant}>
                 <div className="space-y-4">
+                  {/* Size Selector - Show prominently if category requires size */}
+                  {selectedProduct && (() => {
+                    const requiresSize = productRequiresSize(selectedProduct);
+                    const sizeInfo = getCategorySizeInfo(selectedProduct);
+                    return requiresSize && sizeInfo ? (
+                      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <label className="block text-sm font-semibold text-black mb-2">
+                          Size <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={attributePairs.find(p => p.key === 'size')?.value || ''}
+                          onChange={(e) => {
+                            const sizeIndex = attributePairs.findIndex(p => p.key === 'size');
+                            if (sizeIndex >= 0) {
+                              updateAttributePair(sizeIndex, 'value', e.target.value);
+                            } else {
+                              // Add size pair if it doesn't exist
+                              setAttributePairs([{key: 'size', value: e.target.value}, ...attributePairs]);
+                            }
+                          }}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                          required
+                        >
+                          <option value="">Select size</option>
+                          {sizeInfo.sizeOptions.map((size) => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-600">
+                          Select the size for this variant. Available sizes: {sizeInfo.sizeOptions.slice(0, 5).join(', ')}
+                          {sizeInfo.sizeOptions.length > 5 && ` +${sizeInfo.sizeOptions.length - 5} more`}
+                        </p>
+                      </div>
+                    ) : null;
+                  })()}
+                  
                   <div>
                     <div className="flex items-center space-x-2 mb-2">
                       <input
@@ -1280,62 +1331,44 @@ export default function ProductsPage() {
                       />
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Attributes {selectedProduct && productRequiresSize(selectedProduct) && <span className="text-red-500">*</span>}
+                      Additional Attributes {selectedProduct && productRequiresSize(selectedProduct) && <span className="text-gray-400 text-xs">(optional)</span>}
                     </label>
                     <div className="space-y-2">
-                      {attributePairs.map((pair, index) => {
-                        const isSizeField = pair.key === 'size';
-                        const isRequired = isSizeField && selectedProduct && productRequiresSize(selectedProduct);
-                        return (
-                          <div key={index} className="flex space-x-2">
-                            <input
-                              type="text"
-                              placeholder={isSizeField ? "size (required)" : "Key (e.g., color)"}
-                              value={pair.key}
-                              onChange={(e) => updateAttributePair(index, 'key', e.target.value)}
-                              className={`flex-1 border rounded-md px-3 py-2 text-sm ${
-                                isSizeField && isRequired
-                                  ? 'border-gray-300 bg-gray-50' 
-                                  : 'border-gray-300'
-                              }`}
-                              disabled={!!(isSizeField && isRequired)}
-                            />
-                            {isSizeField && isRequired ? (
-                              <select
-                                value={pair.value}
-                                onChange={(e) => updateAttributePair(index, 'value', e.target.value)}
-                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                                required={!!isRequired}
-                              >
-                                <option value="">Select size</option>
-                                {selectedProduct && getSizeOptions(selectedProduct.category_name, selectedProduct.category).map((size) => (
-                                  <option key={size} value={size}>{size}</option>
-                                ))}
-                              </select>
-                            ) : (
+                      {attributePairs
+                        .map((pair, originalIndex) => ({ pair, originalIndex }))
+                        .filter(({ pair }) => pair.key !== 'size' || !productRequiresSize(selectedProduct!))
+                        .map(({ pair, originalIndex }, displayIndex) => {
+                          return (
+                            <div key={originalIndex} className="flex space-x-2">
                               <input
                                 type="text"
-                                placeholder={isSizeField ? "Value (e.g., large)" : "Value (e.g., red)"}
-                                value={pair.value}
-                                onChange={(e) => updateAttributePair(index, 'value', e.target.value)}
+                                placeholder="Key (e.g., color)"
+                                value={pair.key}
+                                onChange={(e) => updateAttributePair(originalIndex, 'key', e.target.value)}
                                 className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                                required={!!isRequired}
                               />
-                            )}
-                            {attributePairs.length > 1 && !(isSizeField && isRequired) && (
-                              <button
-                                type="button"
-                                onClick={() => removeAttributePair(index)}
-                                className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
+                              <input
+                                type="text"
+                                placeholder="Value (e.g., red)"
+                                value={pair.value}
+                                onChange={(e) => updateAttributePair(originalIndex, 'value', e.target.value)}
+                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                              />
+                              {attributePairs.filter(p => p.key !== 'size' || !productRequiresSize(selectedProduct!)).length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeAttributePair(originalIndex)}
+                                  className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
                       <button
                         type="button"
                         onClick={addAttributePair}

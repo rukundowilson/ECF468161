@@ -27,6 +27,8 @@ export class ProductService {
     if (filters?.search) params.append('search', filters.search);
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
+    // Include products without variants for admin pages
+    if (filters?.includeWithoutVariants) params.append('includeWithoutVariants', 'true');
 
     const response = await API.get(`/api/products?${params.toString()}`);
     return response.data.data || [];
@@ -75,5 +77,15 @@ export class ProductService {
 
   static async deleteProductVariant(variantId: number): Promise<void> {
     await API.delete(`/api/products/variants/${variantId}`);
+  }
+
+  // Get total product quantity (sum of all variant quantities)
+  static async getProductTotalQuantity(productId: number): Promise<{
+    total_quantity: number;
+    total_available: number;
+    variant_count: number;
+  }> {
+    const response = await API.get(`/api/products/${productId}/quantity`);
+    return response.data.data;
   }
 }

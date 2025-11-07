@@ -47,6 +47,14 @@ export default function ProductDetailsPage() {
         ProductService.getProductVariants(productId)
       ]);
       
+      // Products without variants cannot be displayed
+      if (!variantsData || variantsData.length === 0) {
+        setProduct(null);
+        setVariants([]);
+        setLoading(false);
+        return;
+      }
+      
       setProduct(productData);
       setVariants(variantsData || []);
       
@@ -60,6 +68,10 @@ export default function ProductDetailsPage() {
       }
     } catch (error) {
       console.error('Failed to load product data:', error);
+      // If product not found or has no variants, set product to null
+      if (error instanceof Error && error.message.includes('no variants')) {
+        setProduct(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -166,11 +178,14 @@ export default function ProductDetailsPage() {
     );
   }
 
-  if (!product) {
+  if (!product || variants.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Product not found</h2>
+          <h2 className="text-2xl font-bold mb-4">Product not available</h2>
+          <p className="text-gray-600 mb-4">
+            This product cannot be displayed because it has no variants. Products must have at least one variant to be displayed.
+          </p>
           <Link href="/" className="text-indigo-600 hover:text-indigo-700">
             Back to Home
           </Link>

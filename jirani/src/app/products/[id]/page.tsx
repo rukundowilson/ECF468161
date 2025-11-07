@@ -208,19 +208,21 @@ export default function ProductDetailsPage() {
             
             {/* Thumbnail Gallery */}
             {variants.length > 0 && variants.some(v => v.image_url) && (
-              <div className="grid grid-cols-4 gap-2 p-4 border-t">
+              <div className="grid grid-cols-4 gap-3 p-4 bg-gray-50">
                 {variants.filter(v => v.image_url).map((variant) => (
                   <button
                     key={variant.id}
                     onClick={() => handleVariantSelect(variant)}
-                    className={`border-2 rounded overflow-hidden ${
-                      selectedVariant?.id === variant.id ? 'border-indigo-500' : 'border-gray-200'
+                    className={`rounded-lg overflow-hidden transition-all transform ${
+                      selectedVariant?.id === variant.id 
+                        ? 'ring-2 ring-indigo-500 ring-offset-2 scale-105 shadow-lg' 
+                        : 'hover:scale-105 hover:shadow-md'
                     }`}
                   >
                     <img
                       src={variant.image_url!}
                       alt={variant.sku}
-                      className="w-full h-20 object-contain"
+                      className="w-full h-20 object-contain bg-white rounded-lg"
                     />
                   </button>
                 ))}
@@ -265,12 +267,12 @@ export default function ProductDetailsPage() {
                         key={size}
                         onClick={() => isAvailable && handleSizeSelect(size)}
                         disabled={!isAvailable}
-                        className={`px-4 py-2 border-2 rounded text-sm font-medium transition ${
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all transform ${
                           isSelected
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            ? 'bg-indigo-500 text-white shadow-md scale-105 ring-2 ring-indigo-300'
                             : isAvailable
-                            ? 'border-gray-300 hover:border-indigo-300 text-gray-700'
-                            : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:scale-105'
+                            : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
                         }`}
                       >
                         {size}
@@ -287,15 +289,15 @@ export default function ProductDetailsPage() {
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
                   Select Variant
                 </label>
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 gap-3">
                   {variants.map((variant) => (
                     <button
                       key={variant.id}
                       onClick={() => handleVariantSelect(variant)}
-                      className={`w-full p-3 border-2 rounded text-left transition ${
+                      className={`w-full p-4 rounded-lg text-left transition-all transform ${
                         selectedVariant?.id === variant.id
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'bg-indigo-50 shadow-md ring-2 ring-indigo-500 scale-[1.02]'
+                          : 'bg-gray-50 hover:bg-gray-100 hover:shadow-sm'
                       }`}
                     >
                       <div className="flex justify-between items-center">
@@ -317,7 +319,7 @@ export default function ProductDetailsPage() {
                           <img
                             src={variant.image_url}
                             alt={variant.sku}
-                            className="w-16 h-16 object-contain ml-4"
+                            className="w-16 h-16 object-contain ml-4 rounded-lg bg-white p-1"
                           />
                         )}
                       </div>

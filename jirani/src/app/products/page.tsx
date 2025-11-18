@@ -38,6 +38,7 @@ export default function ProductsPage() {
     brand: '',
     price: 0,
     active: 1,
+    size: '',
     is_jirani_recommended: 0,
     show_in_new_arrivals: 0,
   });
@@ -260,7 +261,7 @@ export default function ProductsPage() {
           console.error('Initial stock (product) failed:', (e as any)?.message || e);
         }
       }
-      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
       setProductInitialWarehouseId('');
       setProductInitialQty(0);
       setImageFile(null);
@@ -288,7 +289,7 @@ export default function ProductsPage() {
       const updatedProduct = await ProductService.updateProduct(editingProduct.id, updateData);
       setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
       setEditingProduct(null);
-      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+      setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -491,6 +492,7 @@ export default function ProductsPage() {
       brand: product.brand || '',
       price: product.price,
       active: product.active,
+      size: product.size || '',
       is_jirani_recommended: product.is_jirani_recommended || 0,
       show_in_new_arrivals: product.show_in_new_arrivals || 0,
     });
@@ -535,7 +537,7 @@ export default function ProductsPage() {
   const cancelEdit = () => {
     setEditingProduct(null);
     setEditingVariant(null);
-    setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+    setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
     setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
     setAttributePairs([{key: '', value: ''}]);
     setAutoGenerateSku(true);
@@ -736,65 +738,65 @@ export default function ProductsPage() {
                       const hasVariants = selectedProduct?.id === product.id ? variants.length > 0 : undefined;
                       
                       return (
-                      <div
-                        key={product.id || index}
-                        className={`p-4 border rounded-lg cursor-pointer transition ${
-                          selectedProduct?.id === product.id
-                            ? 'border-blue-500 bg-blue-50 shadow-sm'
-                            : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                    <div
+                      key={product.id || index}
+                      className={`p-4 border rounded-lg cursor-pointer transition ${
+                        selectedProduct?.id === product.id
+                          ? 'border-blue-500 bg-blue-50 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                         } ${hasVariants === false ? 'border-yellow-300 bg-yellow-50' : ''}`}
-                        onClick={() => setSelectedProduct(product)}
-                      >
-                        <div className="flex justify-between items-start">
+                      onClick={() => setSelectedProduct(product)}
+                    >
+                      <div className="flex justify-between items-start">
                           <div className="flex items-start space-x-3 flex-1">
-                            {product.image_url && (
-                              <img
-                                src={product.image_url}
-                                alt={product.name}
-                                className="h-14 w-14 object-cover rounded cursor-pointer"
-                                onClick={() => { setImagePreviewUrl(product.image_url!); setShowImagePreview(true); }}
-                              />
-                            )}
+                          {product.image_url && (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="h-14 w-14 object-cover rounded cursor-pointer"
+                              onClick={() => { setImagePreviewUrl(product.image_url!); setShowImagePreview(true); }}
+                            />
+                          )}
                             <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-black">{product.name || 'Unnamed Product'}</h3>
+                          <h3 className="font-medium text-black">{product.name || 'Unnamed Product'}</h3>
                               {hasVariants === false && (
                                 <span className="px-2 py-0.5 text-xs font-medium bg-yellow-200 text-yellow-800 rounded">
                                   No Variants
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-black mt-1">{product.description || 'No description'}</p>
-                            <p className="text-xs text-gray-600 mt-1">
-                              SKU: {product.sku || 'N/A'} | Price: {Number(product.price || 0).toFixed(2)} frw
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              Category: {product.category_name || 'N/A'} | Brand: {product.brand || 'N/A'}
-                            </p>
-                            </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (product.id) startEditProduct(product);
-                              }}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (product.id) handleDeleteProduct(product.id);
-                              }}
-                              className="text-red-600 hover:text-red-800 text-sm"
-                            >
-                              Delete
-                            </button>
+                          <p className="text-sm text-black mt-1">{product.description || 'No description'}</p>
+                          <p className="text-xs text-gray-600 mt-1">
+                              SKU: {product.sku || 'N/A'} | Price: {Math.round(product.price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} frw
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            Category: {product.category_name || 'N/A'} | Brand: {product.brand || 'N/A'}
+                          </p>
                           </div>
                         </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (product.id) startEditProduct(product);
+                            }}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (product.id) handleDeleteProduct(product.id);
+                            }}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
+                    </div>
                     );
                     })}
                 </div>
@@ -1022,7 +1024,11 @@ export default function ProductsPage() {
                       <label className="block text-sm font-medium text-black">Category</label>
                       <select
                         value={productForm.category_id || ''}
-                        onChange={(e) => setProductForm({ ...productForm, category_id: parseInt(e.target.value) || 0 })}
+                        onChange={(e) => {
+                          const selectedCategoryId = parseInt(e.target.value) || 0;
+                          const selectedCategory = categories.find(c => c.id === selectedCategoryId);
+                          setProductForm({ ...productForm, category_id: selectedCategoryId, size: '' });
+                        }}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
                       >
@@ -1043,6 +1049,58 @@ export default function ProductsPage() {
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       />
                     </div>
+                  </div>
+                  {/* Size Selector - Always visible and required */}
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <label className="block text-sm font-semibold text-black mb-2">
+                      Size <span className="text-red-500">*</span>
+                    </label>
+                    {(() => {
+                      const selectedCategory = categories.find(c => c.id === productForm.category_id);
+                      let sizeOptions: string[] = [];
+                      
+                      if (selectedCategory) {
+                        // Get size options from category
+                        if (selectedCategory.size_options) {
+                          if (Array.isArray(selectedCategory.size_options)) {
+                            sizeOptions = selectedCategory.size_options;
+                          } else if (typeof selectedCategory.size_options === 'string') {
+                            try {
+                              sizeOptions = JSON.parse(selectedCategory.size_options);
+                            } catch {
+                              sizeOptions = selectedCategory.size_options.split(',').map((s: string) => s.trim()).filter((s: string) => s);
+                            }
+                          }
+                        }
+                        
+                        // Use utility function as fallback if no size options from category
+                        if (sizeOptions.length === 0) {
+                          sizeOptions = getSizeOptions(selectedCategory.name, selectedCategory);
+                        }
+                      }
+                      
+                      // Default sizes if no category selected or no size options
+                      if (sizeOptions.length === 0) {
+                        sizeOptions = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+                      }
+                      
+                      return (
+                        <select
+                          value={productForm.size || ''}
+                          onChange={(e) => setProductForm({ ...productForm, size: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                          required
+                        >
+                          <option value="">Select size</option>
+                          {sizeOptions.map((size: string) => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </select>
+                      );
+                    })()}
+                    <p className="mt-1 text-xs text-gray-600">
+                      <span className="text-red-500">*</span> Size is required. This allows the product to be purchased without variants.
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1262,14 +1320,13 @@ export default function ProductsPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-black">Additional Price</label>
+                    <label className="block text-sm font-medium text-black">Additional Price (optional)</label>
                       <input
                         type="number"
                         step="0.01"
                         value={variantForm.additional_price || ''}
                         onChange={(e) => setVariantForm({ ...variantForm, additional_price: parseFloat(e.target.value) || 0 })}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        required
                       />
                   </div>
                   <div>
@@ -1341,12 +1398,12 @@ export default function ProductsPage() {
                         .map((pair, originalIndex) => ({ pair, originalIndex }))
                         .filter(({ pair }) => pair.key !== 'size' || !productRequiresSize(selectedProduct!))
                         .map(({ pair, originalIndex }, displayIndex) => {
-                          return (
+                        return (
                             <div key={originalIndex} className="flex space-x-2">
-                              <input
-                                type="text"
+                            <input
+                              type="text"
                                 placeholder="Key (e.g., color)"
-                                value={pair.key}
+                              value={pair.key}
                                 onChange={(e) => updateAttributePair(originalIndex, 'key', e.target.value)}
                                 className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
                               />
@@ -1358,17 +1415,17 @@ export default function ProductsPage() {
                                 className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
                               />
                               {attributePairs.filter(p => p.key !== 'size' || !productRequiresSize(selectedProduct!)).length > 1 && (
-                                <button
-                                  type="button"
+                              <button
+                                type="button"
                                   onClick={() => removeAttributePair(originalIndex)}
-                                  className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
-                                >
-                                  ✕
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
+                                className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                       <button
                         type="button"
                         onClick={addAttributePair}

@@ -26,9 +26,14 @@ export class StockService {
     return response.data.data || [];
   }
 
-  static async getStockByProduct(productId: number, variantId?: number): Promise<Stock[]> {
+  static async getStockByProduct(productId: number, variantId?: number | null): Promise<Stock[]> {
     const params = new URLSearchParams();
-    if (variantId) params.append('variant_id', variantId.toString());
+    if (variantId !== undefined && variantId !== null) {
+      params.append('variant_id', variantId.toString());
+    } else if (variantId === null) {
+      // Explicitly request stock for product without variant
+      params.append('variant_id', 'null');
+    }
     
     const response = await API.get(`/api/stock/levels/product/${productId}?${params.toString()}`);
     return response.data.data || [];

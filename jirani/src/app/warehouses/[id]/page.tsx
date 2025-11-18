@@ -105,3 +105,12 @@ export default function WarehouseDetailPage() {
 
 
 
+
+
+
+
+
+
+
+
+

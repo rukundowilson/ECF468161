@@ -201,13 +201,25 @@ export default function EcommerceHomepage() {
                     Discover amazing products from local vendors across <span className="font-bold text-orange-300">Kigali and all districts</span>. Fast delivery nationwide, up to 50% off on selected items!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                    <Link 
-                      href="/products"
-                      className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 shadow-xl"
+                    <div className="relative w-full sm:w-auto">
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => handleCategorySelect(e.target.value ? Number(e.target.value) : '')}
+                        className="group bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-orange-600 transition-all transform hover:scale-105 hover:shadow-2xl shadow-xl appearance-none cursor-pointer w-full sm:w-auto pr-10 focus:outline-none focus:ring-2 focus:ring-orange-300"
                     >
-                      Shop Now
-                      <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-                    </Link>
+                        <option value="" className="bg-white text-gray-900">Shop by Category</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id} className="bg-white text-gray-900">
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -272,61 +284,15 @@ export default function EcommerceHomepage() {
         </div>
       </section>
 
-
-      {/* Categories */}
-      <section className="pt-0 pb-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 pt-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Shop by Category</h2>
-            <p className="text-base text-gray-600">Browse our wide selection of products</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
-            {loading ? (
-              <div className="col-span-full text-center text-gray-500 py-8">Loading categories...</div>
-            ) : categories.length > 0 ? (
-              categories.map((category) => {
-                const display = getCategoryDisplay(category.id, category.name);
-                const categoryImage = categoryImages[category.id];
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/category/${category.id}`}
-                    className={`${display.color} p-6 rounded-2xl hover:shadow-xl transition-all transform hover:scale-105 hover:-translate-y-1 text-center group cursor-pointer overflow-hidden`}
-                  >
-                    <div className="mb-3 group-hover:scale-110 transition-transform flex items-center justify-center h-20">
-                      {categoryImage && !failedImages.has(category.id) ? (
-                        <img 
-                          src={categoryImage} 
-                          alt={category.name}
-                          className="w-full h-full object-cover rounded-lg"
-                          onError={() => {
-                            // Mark this image as failed and show icon fallback
-                            setFailedImages(prev => new Set(prev).add(category.id));
-                          }}
-                        />
-                      ) : (
-                        <div className="text-5xl">{display.icon}</div>
-                      )}
-                    </div>
-                    <p className="font-bold text-gray-800 text-xs md:text-sm">{category.name}</p>
-                  </Link>
-                );
-              })
-            ) : (
-              <div className="col-span-full text-center text-gray-500 py-8">
-                No categories available
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* Featured Products */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">New Arrivals</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-orange-500"></span>
+                New Arrivals
+              </h2>
               <p className="text-sm text-gray-600">Handpicked products just for you</p>
             </div>
             <Link 
@@ -369,7 +335,10 @@ export default function EcommerceHomepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">💎jirani picks</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-orange-500"></span>
+                jirani picks
+              </h2>
             </div>
             <Link 
               href="/products"
@@ -457,7 +426,11 @@ export default function EcommerceHomepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-gray-900 text-lg font-bold mb-4">Jirani</h3>
+              <img 
+                src="/logo/jilani-white-logo.png" 
+                alt="Jirani Logo" 
+                className="w-auto h-auto max-h-10 mb-4 object-contain"
+              />
               <p className="text-xs text-gray-700">Your trusted local marketplace for quality products across Rwanda.</p>
             </div>
             <div>

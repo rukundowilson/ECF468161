@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, ShoppingCart, Heart, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
@@ -72,9 +73,15 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
-            <h1 className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition">
-              Jirani
-            </h1>
+            <img 
+              src="/logo/jilani-white-logo.png" 
+              alt="Jirani Logo" 
+              className="w-auto h-auto max-h-12 object-contain group-hover:opacity-80 transition-opacity"
+              onError={(e) => {
+                console.error('Logo failed to load from /logo/jilani-white-logo.png');
+                e.currentTarget.style.display = 'none';
+              }}
+            />
           </Link>
 
           {/* Search Bar - Desktop */}
@@ -96,7 +103,7 @@ export default function Navbar() {
           {/* Right Icons */}
           <div className="flex items-center space-x-4 md:space-x-6">
             <Link 
-              href="/dashboard"
+              href="/launch-outfit"
               className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,10 +131,11 @@ export default function Navbar() {
             
             {showSearch && (
               <button 
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition" 
+                className="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-300 transition" 
                 onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Toggle menu"
               >
-                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                {menuOpen ? <X size={24} className="text-gray-900" /> : <Menu size={24} className="text-gray-900" />}
               </button>
             )}
           </div>
@@ -148,7 +156,49 @@ export default function Navbar() {
             </div>
           </div>
         )}
+
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-gray-200 pt-4 pb-4">
+            <div className="flex flex-col space-y-2">
+              <Link
+                href="/launch-outfit"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>Launch Outfit</span>
+              </Link>
+              
+              {showWishlist && (
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium text-left"
+                >
+                  <Heart size={20} />
+                  <span>Wishlist</span>
+                </button>
+              )}
+              
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition font-medium text-left"
+              >
+                <ShoppingCart size={20} />
+                <span>Cart</span>
+                {cartCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
 }
+

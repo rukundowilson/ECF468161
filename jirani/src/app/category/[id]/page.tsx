@@ -205,7 +205,11 @@ export default function CategoryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-gray-900 text-lg font-bold mb-4">Jirani</h3>
+              <img 
+                src="/logo/jilani-white-logo.png" 
+                alt="Jirani Logo" 
+                className="w-auto h-auto max-h-10 mb-4 object-contain"
+              />
               <p className="text-xs text-gray-700">Your trusted local marketplace for quality products across Rwanda.</p>
             </div>
             <div>

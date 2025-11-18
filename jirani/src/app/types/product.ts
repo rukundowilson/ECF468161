@@ -9,6 +9,7 @@ export interface Product {
   price: number;
   active: number;
   image_url?: string;
+  size?: string;
   is_jirani_recommended?: number;
   show_in_new_arrivals?: number;
   created_at: string;
@@ -40,6 +41,7 @@ export interface CreateProductRequest {
   price: number;
   active?: number;
   image_url?: string;
+  size?: string;
   is_jirani_recommended?: number;
   show_in_new_arrivals?: number;
 }
@@ -53,6 +55,7 @@ export interface UpdateProductRequest {
   price?: number;
   active?: number;
   image_url?: string;
+  size?: string;
   is_jirani_recommended?: number;
   show_in_new_arrivals?: number;
 }

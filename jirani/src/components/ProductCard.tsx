@@ -77,7 +77,7 @@ export default function ProductCard({ product, discountPercent, rating, orders }
         {/* Price Section */}
         <div className="flex items-baseline gap-2 mb-2">
           <span className="text-xl font-bold text-red-500">
-            {Number(product.price || 0).toLocaleString()} RWF
+            {Math.round(product.price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} RWF
           </span>
         </div>
 
@@ -93,6 +93,12 @@ export default function ProductCard({ product, discountPercent, rating, orders }
     </Link>
   );
 }
+
+
+
+
+
+
 
 
 

@@ -87,7 +87,10 @@ export default function DashboardOverview() {
           {/* Jirani Picks Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">💎 Jirani Picks</h2>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+                Jirani Picks
+              </h2>
               <Link href="/products" className="text-sm text-blue-600 hover:text-blue-700">
                 View All →
               </Link>
@@ -105,7 +108,7 @@ export default function DashboardOverview() {
                     )}
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h3>
                     <p className="text-xs text-gray-500 mb-2">{product.category_name || 'Uncategorized'}</p>
-                    <p className="text-lg font-bold text-gray-900">{Number(product.price || 0).toFixed(2)} frw</p>
+                    <p className="text-lg font-bold text-gray-900">{Math.round(product.price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} frw</p>
                     <Link 
                       href={`/products`}
                       className="text-xs text-blue-600 hover:text-blue-700 mt-2 inline-block"
@@ -125,7 +128,10 @@ export default function DashboardOverview() {
           {/* New Arrivals Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">✨ New Arrivals</h2>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+                New Arrivals
+              </h2>
               <Link href="/products" className="text-sm text-blue-600 hover:text-blue-700">
                 View All →
               </Link>
@@ -143,7 +149,7 @@ export default function DashboardOverview() {
                     )}
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h3>
                     <p className="text-xs text-gray-500 mb-2">{product.category_name || 'Uncategorized'}</p>
-                    <p className="text-lg font-bold text-gray-900">{Number(product.price || 0).toFixed(2)} frw</p>
+                    <p className="text-lg font-bold text-gray-900">{Math.round(product.price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} frw</p>
                     <Link 
                       href={`/products`}
                       className="text-xs text-blue-600 hover:text-blue-700 mt-2 inline-block"

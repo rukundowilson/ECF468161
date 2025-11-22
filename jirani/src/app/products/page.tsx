@@ -290,14 +290,24 @@ export default function ProductsPage() {
       setLoading(true);
       setError(null);
       const updateData: any = { ...productForm };
+      
+      // Preserve existing image_url if no new image is uploaded
       if (imageFile) {
         const uploaded = await ProductService.uploadProductImage(imageFile);
         updateData.image_url = uploaded.url;
+      } else if (editingProduct.image_url) {
+        // Preserve existing image if no new file is selected
+        updateData.image_url = editingProduct.image_url;
       }
+      
+      // Ensure size is preserved (even if empty string, include it)
+      updateData.size = productForm.size || null;
+      
       const updatedProduct = await ProductService.updateProduct(editingProduct.id, updateData);
       setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
       setEditingProduct(null);
       setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+      setProductAttributePairs([{key: '', value: ''}]);
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -505,6 +515,12 @@ export default function ProductsPage() {
       show_in_new_arrivals: product.show_in_new_arrivals || 0,
     });
     setAutoGenerateSku(false); // When editing, allow manual SKU editing
+    // Clear image file/preview so existing image is shown
+    setImageFile(null);
+    setImagePreview(null);
+    // Reset initial stock fields (these are only for new products)
+    setProductInitialWarehouseId('');
+    setProductInitialQty(0);
   };
 
   const startEditVariant = (variant: ProductVariant) => {
@@ -1241,32 +1257,41 @@ export default function ProductsPage() {
                       </select>
                     </div>
                   </div>
-                  {/* Optional initial stock for new product */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-black">Initial Warehouse (optional)</label>
-                      <select
-                        value={productInitialWarehouseId}
-                        onChange={(e) => setProductInitialWarehouseId(e.target.value ? Number(e.target.value) : '')}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      >
-                        <option value="">Select warehouse</option>
-                        {warehouses.map((w) => (
-                          <option key={w.id} value={w.id}>{w.name}</option>
-                        ))}
-                      </select>
+                  {/* Optional initial stock for new product only */}
+                  {!editingProduct && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-black">Initial Warehouse (optional)</label>
+                        <select
+                          value={productInitialWarehouseId}
+                          onChange={(e) => setProductInitialWarehouseId(e.target.value ? Number(e.target.value) : '')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                        >
+                          <option value="">Select warehouse</option>
+                          {warehouses.map((w) => (
+                            <option key={w.id} value={w.id}>{w.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-black">Initial Quantity (optional)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={productInitialQty}
+                          onChange={(e) => setProductInitialQty(parseInt(e.target.value) || 0)}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-black">Initial Quantity (optional)</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={productInitialQty}
-                        onChange={(e) => setProductInitialQty(parseInt(e.target.value) || 0)}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                      />
+                  )}
+                  {editingProduct && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <strong>Note:</strong> To manage stock for this product, use the "Manage Stock" button after closing this form.
+                      </p>
                     </div>
-                  </div>
+                  )}
                   {/* Product Flags */}
                   <div className="mt-4 space-y-3">
                     <div className="flex items-center">

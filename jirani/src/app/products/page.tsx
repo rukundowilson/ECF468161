@@ -50,6 +50,7 @@ export default function ProductsPage() {
     active: 1,
   });
   const [attributePairs, setAttributePairs] = useState<Array<{key: string, value: string}>>([{key: '', value: ''}]);
+  const [productAttributePairs, setProductAttributePairs] = useState<Array<{key: string, value: string}>>([{key: '', value: ''}]);
   const [autoGenerateVariantSku, setAutoGenerateVariantSku] = useState(true);
   const [generatedVariantSku, setGeneratedVariantSku] = useState('');
   const [variantImageFile, setVariantImageFile] = useState<File | null>(null);
@@ -262,6 +263,7 @@ export default function ProductsPage() {
         }
       }
       setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
+      setProductAttributePairs([{key: '', value: ''}]);
       setProductInitialWarehouseId('');
       setProductInitialQty(0);
       setImageFile(null);
@@ -540,6 +542,7 @@ export default function ProductsPage() {
     setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
     setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
     setAttributePairs([{key: '', value: ''}]);
+    setProductAttributePairs([{key: '', value: ''}]);
     setAutoGenerateSku(true);
     setAutoGenerateVariantSku(true);
     setGeneratedVariantSku('');
@@ -587,6 +590,23 @@ export default function ProductsPage() {
     if (autoGenerateVariantSku && selectedProduct) {
       generateVariantSku(selectedProduct.sku, attributes);
     }
+  };
+
+  // Helper functions for product attribute pairs
+  const addProductAttributePair = () => {
+    setProductAttributePairs([...productAttributePairs, {key: '', value: ''}]);
+  };
+
+  const removeProductAttributePair = (index: number) => {
+    if (productAttributePairs.length > 1) {
+      setProductAttributePairs(productAttributePairs.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateProductAttributePair = (index: number, field: 'key' | 'value', value: string) => {
+    const updated = [...productAttributePairs];
+    updated[index][field] = value;
+    setProductAttributePairs(updated);
   };
 
   const generateVariantSku = (productSku: string, attributes: Record<string, any>) => {
@@ -1100,6 +1120,49 @@ export default function ProductsPage() {
                     })()}
                     <p className="mt-1 text-xs text-gray-600">
                       <span className="text-red-500">*</span> Size is required. This allows the product to be purchased without variants.
+                    </p>
+                  </div>
+                  {/* Product Attributes */}
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Product Attributes</label>
+                    <div className="space-y-2">
+                      {productAttributePairs.map((pair, index) => (
+                        <div key={index} className="flex space-x-2">
+                          <input
+                            type="text"
+                            placeholder="Key (e.g., color)"
+                            value={pair.key}
+                            onChange={(e) => updateProductAttributePair(index, 'key', e.target.value)}
+                            className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Value (e.g., red)"
+                            value={pair.value}
+                            onChange={(e) => updateProductAttributePair(index, 'value', e.target.value)}
+                            className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                          />
+                          {productAttributePairs.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeProductAttributePair(index)}
+                              className="px-2 py-1 text-red-600 hover:text-red-800 text-sm"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addProductAttributePair}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        + Add Attribute
+                      </button>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Add key-value pairs for product attributes (e.g., color: red, material: cotton).
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">

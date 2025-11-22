@@ -287,7 +287,7 @@ export default function EcommerceHomepage() {
       {/* Featured Products */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
+          <div className="mb-12">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-orange-500"></span>
@@ -295,13 +295,6 @@ export default function EcommerceHomepage() {
               </h2>
               <p className="text-sm text-gray-600">Handpicked products just for you</p>
             </div>
-            <Link 
-              href="/products"
-              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-base hover:text-gray-800 transition group"
-            >
-              View All Products
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-            </Link>
           </div>
           {loading ? (
             <div className="text-center py-12 text-gray-500">Loading products...</div>
@@ -333,20 +326,13 @@ export default function EcommerceHomepage() {
       {/* Trending Deals */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
+          <div className="mb-12">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-orange-500"></span>
                 jirani picks
               </h2>
             </div>
-            <Link 
-              href="/products"
-              className="mt-4 sm:mt-0 flex items-center gap-2 text-gray-700 font-bold text-base hover:text-gray-800 transition group"
-            >
-              View All Products
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-            </Link>
           </div>
           {loading ? (
             <div className="text-center py-12 text-gray-500">Loading products...</div>

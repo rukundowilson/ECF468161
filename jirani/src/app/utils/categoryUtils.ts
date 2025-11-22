@@ -214,8 +214,9 @@ export function validateSizeFormat(size: string, categoryName: string | undefine
   }
   
   if (usesLetterSizes(categoryName, category)) {
-    // Letter sizes: XS, S, M, L, XL, etc.
-    return /^[X]*[SL]$/.test(sizeValue);
+    // Letter sizes: XS, S, M, L, XL, XXL, XXXL, etc.
+    // Match: S, M, L, XS, XL, XXS, XXL, XXXS, XXXL, etc.
+    return /^X*[SML]$/.test(sizeValue);
   }
   
   return true; // For categories that don't require specific format

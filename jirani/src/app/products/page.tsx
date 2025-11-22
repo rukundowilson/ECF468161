@@ -219,7 +219,9 @@ export default function ProductsPage() {
 
   const loadStockLevels = async (productId: number) => {
     try {
-      const data = await StockService.getStockByProduct(productId);
+      // Load all stock for the product (both parent product stock with variant_id = null and all variant stock)
+      // Passing undefined means no variant filter, so we get all stock
+      const data = await StockService.getStockByProduct(productId, undefined);
       setStockLevels(data);
     } catch (err: any) {
       console.error('Failed to load stock levels:', err.message);
@@ -851,6 +853,48 @@ export default function ProductsPage() {
                 <div className="text-center py-4 text-black">Loading...</div>
               ) : (
                 <div className="space-y-3">
+                  {/* Parent Product Stock Section - Show when variants exist */}
+                  {variants.length > 0 && (
+                    <div className="p-4 border-2 border-blue-200 bg-blue-50 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-semibold text-black mb-1">Parent Product Stock</h3>
+                          <p className="text-xs text-gray-600">Stock for the base product (independent of variants)</p>
+                        </div>
+                        <button
+                          onClick={() => openStockModal(null)}
+                          className="text-green-600 hover:text-green-800 text-sm font-medium"
+                        >
+                          Manage Stock
+                        </button>
+                      </div>
+                      <div className="text-sm text-black mt-2">
+                        <span className="font-medium">Stock:</span>
+                        {getStockForVariant(null).length > 0 ? (
+                          <div className="mt-1">
+                            {getStockForVariant(null).map((stock) => (
+                              <div key={stock.id} className="flex items-center space-x-2">
+                                <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+                                  {stock.warehouse_name}: {stock.quantity_on_hand} units
+                                </span>
+                                {stock.quantity_reserved > 0 && (
+                                  <span className="text-xs bg-yellow-100 px-2 py-1 rounded">
+                                    Reserved: {stock.quantity_reserved}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 ml-2">No stock assigned to parent product</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {/* Variants Section */}
+                  <div className="mb-2">
+                    <h3 className="font-semibold text-black mb-2">Product Variants</h3>
+                  </div>
                   {variants.filter(variant => variant && variant.id).map((variant) => (
                     <div key={variant.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition">
                       <div className="flex justify-between items-start">

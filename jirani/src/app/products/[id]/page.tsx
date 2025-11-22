@@ -133,6 +133,7 @@ export default function ProductDetailsPage() {
     
     try {
       // Load stock for product without variant (variant_id = null)
+      // This is the parent product's own stock, independent of variants
       const stockData = await StockService.getStockByProduct(productId, null);
       setStockLevels(stockData);
       
@@ -149,6 +150,15 @@ export default function ProductDetailsPage() {
         setQuantity(totalAvailable);
       } else if (totalAvailable === 0) {
         setQuantity(0);
+      }
+      
+      // Log for debugging
+      if (variants.length > 0) {
+        console.log('Parent product stock (with variants):', {
+          stockCount: stockData.length,
+          totalAvailable,
+          note: 'This is the parent product stock (variant_id = null), separate from variant stock'
+        });
       }
     } catch (error) {
       console.error('Failed to load stock data:', error);

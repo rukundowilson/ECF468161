@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -19,6 +19,9 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [cartCount, setCartCount] = useState(0);
+  const [showMobileCategoryNav, setShowMobileCategoryNav] = useState(true);
+  const [showMobileCategoryDropdown, setShowMobileCategoryDropdown] = useState(false);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     if (categoryId) {
@@ -60,8 +63,27 @@ export default function CategoryPage() {
     setCartCount(cartCount + 1);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const current = window.scrollY;
+      const last = lastScrollYRef.current;
+
+      if (current > last && current > 100) {
+        setShowMobileCategoryNav(false);
+        setShowMobileCategoryDropdown(false);
+      } else if (current < last - 4) {
+        setShowMobileCategoryNav(true);
+      }
+
+      lastScrollYRef.current = current;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Filter products by search query
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -74,12 +96,86 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile Category Navigation - Top of page */}
+      <div
+        className={`lg:hidden sticky top-16 z-40 bg-white border-b border-gray-200 shadow-sm transition-all duration-300 ${
+          showMobileCategoryNav
+            ? 'translate-y-0 opacity-100 pointer-events-auto'
+            : '-translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="px-4 py-3">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-semibold text-gray-700">Categories</h3>
+            <span className="text-xs text-gray-500 font-medium">
+              {categories.length} total
+            </span>
+          </div>
+          <div className="relative">
+            <div className="flex gap-2 overflow-x-auto pb-2 pr-10 scrollbar-hide">
+              {categories.length > 0 ? (
+                categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/category/${cat.id}`}
+                    className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                      cat.id === categoryId
+                        ? 'bg-orange-500 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    onClick={() => setShowMobileCategoryDropdown(false)}
+                  >
+                    {cat.name}
+                  </Link>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No categories available</p>
+              )}
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-white/0 flex items-center justify-end pr-2">
+              <ArrowRight size={18} className="text-gray-400" />
+            </div>
+          </div>
+
+          {categories.length > 6 && (
+            <button
+              className="mt-3 text-xs font-semibold text-gray-600 flex items-center gap-1 hover:text-orange-500 transition"
+              onClick={() => setShowMobileCategoryDropdown((prev) => !prev)}
+            >
+              {showMobileCategoryDropdown ? 'Hide' : 'More'} categories
+              <span className="text-lg leading-none">{showMobileCategoryDropdown ? '−' : '>'}</span>
+            </button>
+          )}
+
+          {showMobileCategoryDropdown && (
+            <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-56 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {categories.map((cat) => (
+                  <Link
+                    key={`dropdown-${cat.id}`}
+                    href={`/category/${cat.id}`}
+                    className={`px-3 py-2 rounded-lg transition ${
+                      cat.id === categoryId
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                    onClick={() => setShowMobileCategoryDropdown(false)}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Category Products Section */}
       <section className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Sidebar - Categories */}
-            <aside className="lg:w-64 flex-shrink-0">
+            {/* Sidebar - Categories (Desktop only) */}
+            <aside className="hidden lg:block lg:w-64 flex-shrink-0">
               <div className="bg-white rounded-lg p-6 sticky top-24">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">All Categories</h2>
                 <nav className="space-y-2">
@@ -90,7 +186,7 @@ export default function CategoryPage() {
                         href={`/category/${cat.id}`}
                         className={`block px-4 py-3 rounded-lg transition-all ${
                           cat.id === categoryId
-                            ? 'bg-indigo-100 text-indigo-700 font-semibold'
+                            ? 'bg-orange-100 text-orange-700 font-semibold'
                             : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                         }`}
                       >
@@ -110,7 +206,7 @@ export default function CategoryPage() {
               <div className="mb-8">
             <Link 
               href="/"
-              className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition mb-4"
+              className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition mb-4"
             >
               <ArrowLeft size={18} />
               <span className="text-sm font-medium">Back to Home</span>
@@ -179,7 +275,7 @@ export default function CategoryPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="text-orange-500 hover:text-orange-600 font-medium"
                 >
                   Clear search
                 </button>
@@ -187,7 +283,7 @@ export default function CategoryPage() {
               {!searchQuery && (
                 <Link 
                   href="/"
-                  className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 font-medium"
                 >
                   <ArrowRight size={18} />
                   Browse all categories

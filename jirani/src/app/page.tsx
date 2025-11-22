@@ -455,7 +455,7 @@ export default function EcommerceHomepage() {
               <div className="flex space-x-4">
                 <button className="text-2xl hover:opacity-70 transition">📘</button>
                 <button className="text-2xl hover:opacity-70 transition">📷</button>
-                <button className="text-2xl hover:opacity-70 transition">🐦</button>
+                <button className="text-2xl hover:opacity-70 transition">x</button>
               </div>
             </div>
           </div>

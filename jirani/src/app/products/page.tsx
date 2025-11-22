@@ -24,6 +24,8 @@ export default function ProductsPage() {
   const [autoGenerateSku, setAutoGenerateSku] = useState(true);
   const [productInitialWarehouseId, setProductInitialWarehouseId] = useState<number | ''>('');
   const [productInitialQty, setProductInitialQty] = useState<number>(0);
+  const [useMultipleSizes, setUseMultipleSizes] = useState(false);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -235,10 +237,27 @@ export default function ProductsPage() {
       setLoading(true);
       setError(null);
       
+      // Validate sizes
+      if (useMultipleSizes && selectedSizes.length === 0) {
+        setError('Please select at least one size when using multiple sizes mode');
+        setLoading(false);
+        return;
+      }
+      if (!useMultipleSizes && !productForm.size) {
+        setError('Please select a size');
+        setLoading(false);
+        return;
+      }
+      
       // Prepare product data - don't send SKU if auto-generating
       const productData: any = { ...productForm };
       if (autoGenerateSku) {
         delete productData.sku; // Let backend generate SKU
+      }
+      
+      // If using multiple sizes, set the first size as the product size (for compatibility)
+      if (useMultipleSizes && selectedSizes.length > 0) {
+        productData.size = selectedSizes[0];
       }
 
       // Upload image first if selected
@@ -249,29 +268,79 @@ export default function ProductsPage() {
       
       const newProduct = await ProductService.createProduct(productData);
       setProducts([...products, newProduct]);
-      // Optional initial stock for product (only if quantity > 0 and warehouse selected)
-      if (productInitialWarehouseId && productInitialQty > 0) {
+      
+      // If multiple sizes are selected, create variants for each size
+      if (useMultipleSizes && selectedSizes.length > 0) {
         try {
-          await StockService.adjustStock({
-            product_id: newProduct.id,
-            variant_id: null,
-            warehouse_id: Number(productInitialWarehouseId),
-            new_quantity: productInitialQty,
-            reason: 'Initial stock',
-            created_by: 'admin'
-          });
-          // Reload stock levels if this product is currently selected
+          const baseSku = newProduct.sku;
+          for (const size of selectedSizes) {
+            // Generate variant SKU
+            const variantSku = `${baseSku}-${size.toUpperCase()}`;
+            
+            // Create variant for this size
+            const variantData = {
+              sku: variantSku,
+              attributes: { size: size },
+              additional_price: 0,
+              active: 1,
+              image_url: newProduct.image_url || undefined
+            };
+            
+            const newVariant = await ProductService.createProductVariant(newProduct.id, variantData);
+            
+            // Add initial stock for this variant if specified
+            if (productInitialWarehouseId && productInitialQty > 0) {
+              try {
+                await StockService.adjustStock({
+                  product_id: newProduct.id,
+                  variant_id: newVariant.id,
+                  warehouse_id: Number(productInitialWarehouseId),
+                  new_quantity: productInitialQty,
+                  reason: 'Initial stock',
+                  created_by: 'admin'
+                });
+              } catch (e) {
+                console.error(`Initial stock for variant ${size} failed:`, (e as any)?.message || e);
+              }
+            }
+          }
+          
+          // Reload variants and stock if this product is selected
           if (selectedProduct?.id === newProduct.id) {
-            await loadStockLevels(newProduct.id);
+            await loadVariants(newProduct.id);
           }
         } catch (e) {
-          console.error('Initial stock (product) failed:', (e as any)?.message || e);
+          console.error('Failed to create variants for multiple sizes:', (e as any)?.message || e);
+          setError(`Product created but failed to create some variants: ${(e as any)?.message || e}`);
+        }
+      } else {
+        // Single size - optional initial stock for product (only if quantity > 0 and warehouse selected)
+        if (productInitialWarehouseId && productInitialQty > 0) {
+          try {
+            await StockService.adjustStock({
+              product_id: newProduct.id,
+              variant_id: null,
+              warehouse_id: Number(productInitialWarehouseId),
+              new_quantity: productInitialQty,
+              reason: 'Initial stock',
+              created_by: 'admin'
+            });
+            // Reload stock levels if this product is currently selected
+            if (selectedProduct?.id === newProduct.id) {
+              await loadStockLevels(newProduct.id);
+            }
+          } catch (e) {
+            console.error('Initial stock (product) failed:', (e as any)?.message || e);
+          }
         }
       }
+      
       setProductForm({ sku: '', name: '', description: '', category_id: 0, brand: '', price: 0, active: 1, size: '', is_jirani_recommended: 0, show_in_new_arrivals: 0 });
       setProductAttributePairs([{key: '', value: ''}]);
       setProductInitialWarehouseId('');
       setProductInitialQty(0);
+      setUseMultipleSizes(false);
+      setSelectedSizes([]);
       setImageFile(null);
       setImagePreview(null);
       setShowCreateForm(false);
@@ -521,6 +590,9 @@ export default function ProductsPage() {
     // Reset initial stock fields (these are only for new products)
     setProductInitialWarehouseId('');
     setProductInitialQty(0);
+    // Reset multiple sizes (only for new products)
+    setUseMultipleSizes(false);
+    setSelectedSizes([]);
   };
 
   const startEditVariant = (variant: ProductVariant) => {
@@ -565,6 +637,8 @@ export default function ProductsPage() {
     setVariantForm({ sku: '', attributes: {}, additional_price: 0, active: 1 });
     setAttributePairs([{key: '', value: ''}]);
     setProductAttributePairs([{key: '', value: ''}]);
+    setUseMultipleSizes(false);
+    setSelectedSizes([]);
     setAutoGenerateSku(true);
     setAutoGenerateVariantSku(true);
     setGeneratedVariantSku('');
@@ -1116,6 +1190,8 @@ export default function ProductsPage() {
                           const selectedCategoryId = parseInt(e.target.value) || 0;
                           const selectedCategory = categories.find(c => c.id === selectedCategoryId);
                           setProductForm({ ...productForm, category_id: selectedCategoryId, size: '' });
+                          // Clear selected sizes when category changes
+                          setSelectedSizes([]);
                         }}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
@@ -1140,9 +1216,36 @@ export default function ProductsPage() {
                   </div>
                   {/* Size Selector - Always visible and required */}
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <label className="block text-sm font-semibold text-black mb-2">
-                      Size <span className="text-red-500">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-semibold text-black">
+                        Size <span className="text-red-500">*</span>
+                      </label>
+                      {!editingProduct && (
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={useMultipleSizes}
+                            onChange={(e) => {
+                              setUseMultipleSizes(e.target.checked);
+                              if (!e.target.checked) {
+                                setSelectedSizes([]);
+                                // Set first selected size as product size if any were selected
+                                if (selectedSizes.length > 0) {
+                                  setProductForm({ ...productForm, size: selectedSizes[0] });
+                                }
+                              } else {
+                                // If product has a size, add it to selected sizes
+                                if (productForm.size) {
+                                  setSelectedSizes([productForm.size]);
+                                }
+                              }
+                            }}
+                            className="rounded"
+                          />
+                          <span className="text-xs text-gray-700">Add multiple sizes (creates variants)</span>
+                        </label>
+                      )}
+                    </div>
                     {(() => {
                       const selectedCategory = categories.find(c => c.id === productForm.category_id);
                       let sizeOptions: string[] = [];
@@ -1172,23 +1275,61 @@ export default function ProductsPage() {
                         sizeOptions = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
                       }
                       
-                      return (
-                        <select
-                          value={productForm.size || ''}
-                          onChange={(e) => setProductForm({ ...productForm, size: e.target.value })}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
-                          required
-                        >
-                          <option value="">Select size</option>
-                          {sizeOptions.map((size: string) => (
-                            <option key={size} value={size}>{size}</option>
-                          ))}
-                        </select>
-                      );
+                      if (useMultipleSizes && !editingProduct) {
+                        // Multi-select for sizes
+                        return (
+                          <div>
+                            <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
+                              {sizeOptions.map((size: string) => (
+                                <label key={size} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedSizes.includes(size)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedSizes([...selectedSizes, size]);
+                                      } else {
+                                        setSelectedSizes(selectedSizes.filter(s => s !== size));
+                                      }
+                                    }}
+                                    className="rounded"
+                                  />
+                                  <span className="text-sm text-black">{size}</span>
+                                </label>
+                              ))}
+                            </div>
+                            {selectedSizes.length > 0 && (
+                              <p className="mt-2 text-xs text-blue-700 font-medium">
+                                {selectedSizes.length} size{selectedSizes.length > 1 ? 's' : ''} selected: {selectedSizes.join(', ')}
+                              </p>
+                            )}
+                            <p className="mt-1 text-xs text-gray-600">
+                              <span className="text-red-500">*</span> Select one or more sizes. Variants will be created automatically for each selected size.
+                            </p>
+                          </div>
+                        );
+                      } else {
+                        // Single select for size
+                        return (
+                          <>
+                            <select
+                              value={productForm.size || ''}
+                              onChange={(e) => setProductForm({ ...productForm, size: e.target.value })}
+                              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                              required={!useMultipleSizes}
+                            >
+                              <option value="">Select size</option>
+                              {sizeOptions.map((size: string) => (
+                                <option key={size} value={size}>{size}</option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-xs text-gray-600">
+                              <span className="text-red-500">*</span> Size is required. This allows the product to be purchased without variants.
+                            </p>
+                          </>
+                        );
+                      }
                     })()}
-                    <p className="mt-1 text-xs text-gray-600">
-                      <span className="text-red-500">*</span> Size is required. This allows the product to be purchased without variants.
-                    </p>
                   </div>
                   {/* Product Attributes */}
                   <div>

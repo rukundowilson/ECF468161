@@ -46,18 +46,16 @@ export default function ProductDetailsPage() {
     }
   }, [productId]);
 
-  // Load stock when variant changes or when product has no variants (use product size)
+  // Load stock when variant changes or when product has no variants
   useEffect(() => {
-    if (productId) {
+    if (productId && product) {
       if (isBaseProductSelected) {
         // Base product selected - load stock for product (variant_id = null)
         loadStockDataForProduct();
       } else if (selectedVariant) {
         loadStockData();
-      } else if (product && !product.size && variants.length === 0) {
-        // Product without variants and without size - no stock to load
-      } else if (product && product.size && variants.length === 0) {
-        // Product without variants but with size - load stock for product (variant_id = null)
+      } else if (variants.length === 0) {
+        // Product without variants - load stock for product (variant_id = null)
         loadStockDataForProduct();
       }
     }
@@ -73,20 +71,10 @@ export default function ProductDetailsPage() {
         ProductService.getProductVariants(productId)
       ]);
       
-      // Products can be displayed if:
-      // 1. They have at least one variant, OR
-      // 2. They have a size (for products without variants)
-      if ((!variantsData || variantsData.length === 0) && !productData.size) {
-        setProduct(null);
-        setVariants([]);
-        setLoading(false);
-        return;
-      }
-      
       setProduct(productData);
       setVariants(variantsData || []);
       
-      // Auto-select base product if variants exist, otherwise select first variant or product
+      // Auto-select base product if variants exist, otherwise handle product without variants
       if (variantsData && variantsData.length > 0) {
         // When variants exist, default to base product
         setIsBaseProductSelected(true);
@@ -94,16 +82,18 @@ export default function ProductDetailsPage() {
         if (productData.size) {
           setSelectedSize(productData.size);
         }
-      } else if (productData.size) {
-        // Product without variants but with size - set selected size from product
-        setSelectedSize(productData.size);
+      } else {
+        // Product without variants - can still be displayed
         setSelectedVariant(null);
         setIsBaseProductSelected(false);
+        if (productData.size) {
+          setSelectedSize(productData.size);
+        }
       }
     } catch (error) {
       console.error('Failed to load product data:', error);
-      // If product not found or has no variants/size, set product to null
-      if (error instanceof Error && (error.message.includes('no variants') || error.message.includes('not available'))) {
+      // If product not found, set product to null
+      if (error instanceof Error && error.message.includes('not found')) {
         setProduct(null);
       }
     } finally {
@@ -272,13 +262,13 @@ export default function ProductDetailsPage() {
     );
   }
 
-  if (!product || (variants.length === 0 && !product.size)) {
+  if (!product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Product not available</h2>
+          <h2 className="text-2xl font-bold mb-4">Product not found</h2>
           <p className="text-gray-600 mb-4">
-            This product cannot be displayed because it has no variants and no size specified. Products must have at least one variant or a size to be displayed.
+            The product you're looking for doesn't exist.
           </p>
           <Link href="/" className="text-indigo-600 hover:text-indigo-700">
             Back to Home
@@ -575,15 +565,17 @@ export default function ProductDetailsPage() {
               </div>
             )}
 
-            {/* Product Info (for products without variants but with size) */}
-            {!selectedVariant && !isBaseProductSelected && product.size && variants.length === 0 && (
+            {/* Product Info (for products without variants) */}
+            {!selectedVariant && !isBaseProductSelected && variants.length === 0 && (
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h3 className="font-semibold text-gray-900 mb-2">Product Information</h3>
                 <div className="text-sm text-gray-600 space-y-1">
                   <div>SKU: {product.sku}</div>
-                  <div>
-                    Size: <strong>{product.size}</strong>
-                  </div>
+                  {product.size && (
+                    <div>
+                      Size: <strong>{product.size}</strong>
+                    </div>
+                  )}
                   <div className="mt-2">
                     <span className="font-medium">Available Stock:</span>{' '}
                     <span className={availableStock > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
@@ -595,7 +587,7 @@ export default function ProductDetailsPage() {
             )}
 
             {/* Quantity Selector */}
-            {(selectedVariant || isBaseProductSelected || (product.size && variants.length === 0)) && (
+            {product && (
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
                   Quantity
